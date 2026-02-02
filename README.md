@@ -33,6 +33,7 @@ IntNetAdmin is a web-based dashboard for managing DHCP and DNS services on your 
 - Browse and search DNS zones and records
 - Add, edit and delete DNS records (A, AAAA, CNAME, MX, TXT, PTR, NS, SRV)
 - Create new forward and reverse zones
+- **Import zone files** – Upload or paste BIND zone files
 - PTR record support for reverse DNS
 
 ### Network Configuration
@@ -52,11 +53,16 @@ IntNetAdmin is a web-based dashboard for managing DHCP and DNS services on your 
 - Host distribution pie chart
 - Service status monitoring (ISC DHCP, BIND)
 
+### Security
+- 🔐 **PAM authentication** – Uses system users for login
+- ⏱️ **Session timeout** – 5-minute timeout with warning dialog (60 sec countdown)
+- 🔒 **Staged changes** – Preview all modifications before writing to disk
+- 🛡️ **Sudo on demand** – Write operations require sudo password (session-only, never saved)
+- 🧹 **Input sanitization** – All inputs validated and sanitized
+
 ### User Experience
 - 🌙 Dark/Light theme toggle
-- 🌍 **10 languages**: English, Svenska, Deutsch, Français, Español, Italiano, Nederlands, Português, Norsk, Dansk
-- 🔒 Staged changes with "Activate Changes" workflow – preview before writing to disk
-- 🔐 PAM authentication (system users)
+- 🌍 **10 languages** on login and in app: English, Svenska, Deutsch, Français, Español, Italiano, Nederlands, Português, Norsk, Dansk
 - 📱 Responsive design
 
 ## 🚀 Quick Start
@@ -66,9 +72,15 @@ IntNetAdmin is a web-based dashboard for managing DHCP and DNS services on your 
 - Python 3.8+
 - ISC DHCP Server (`isc-dhcp-server`)
 - BIND DNS Server (`bind9`)
-- Linux with PAM
+- Linux/FreeBSD with PAM
 
-### Installation
+### One-Line Install
+
+```bash
+curl -sL https://github.com/yeager/IntNetAdmin/releases/latest/download/intnetadmin-1.1.0.tar.gz | tar xz && sudo ./install.sh
+```
+
+### Manual Installation
 
 ```bash
 # Clone
@@ -80,7 +92,7 @@ python3 -m venv venv
 source venv/bin/activate
 
 # Dependencies
-pip install flask flask-babel python-pam gunicorn
+pip install -r requirements.txt
 
 # Run (development)
 python app.py
@@ -95,15 +107,16 @@ Set environment variables or edit defaults in `app.py`:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| `SECRET_KEY` | (generated) | Flask session key |
 | `DHCP_CONF` | `/etc/dhcp/dhcpd.conf` | DHCP config file |
 | `DHCP_LEASES` | `/var/lib/dhcp/dhcpd.leases` | DHCP leases file |
 | `BIND_DIR` | `/etc/bind` | BIND zone directory |
 | `NETWORK_CIDR` | `192.168.2.0/23` | Network to scan |
-| `SECRET_KEY` | (generated) | Flask session key |
+| `SCAN_INTERVAL` | `7200` | Scan interval (seconds) |
 
-## 📡 API Endpoints
+## 📡 API Reference
 
-### DHCP
+### DHCP Hosts
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/dhcp` | Get DHCP configuration |
@@ -111,11 +124,12 @@ Set environment variables or edit defaults in `app.py`:
 | PUT | `/api/dhcp/host/<hostname>` | Edit host |
 | DELETE | `/api/dhcp/host/<hostname>` | Delete host |
 
-### DNS
+### DNS Zones & Records
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/dns` | Get zones and records |
 | POST | `/api/dns/zone` | Create zone |
+| POST | `/api/dns/zone/import` | Import zone file |
 | POST | `/api/dns/zone/<zone>/record` | Add record |
 | PUT | `/api/dns/zone/<zone>/record` | Edit record |
 | DELETE | `/api/dns/zone/<zone>/record/<name>/<type>` | Delete record |
@@ -134,23 +148,17 @@ Set environment variables or edit defaults in `app.py`:
 | GET | `/api/leases` | Get DHCP leases |
 | POST | `/api/leases/promote` | Promote lease to static + DNS |
 
-### Other
+### System
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/stats` | Dashboard statistics |
 | GET | `/api/scan` | Scan results |
-| POST | `/api/scan/start` | Trigger scan |
+| POST | `/api/scan/start` | Trigger network scan |
 | GET | `/api/services` | Service status |
 | GET | `/api/changes` | Pending changes |
 | POST | `/api/changes/apply` | Apply changes (requires sudo) |
 | POST | `/api/changes/discard` | Discard changes |
-
-## 🔐 Security
-
-- **PAM Authentication** – Uses system users for login
-- **Sudo on demand** – Write operations require sudo password entered through UI
-- **Session-only storage** – Sudo password never written to disk
-- **Staged changes** – All modifications are staged and previewed before applying
+| POST | `/api/session/keepalive` | Extend session timeout |
 
 ## 🐧 Systemd Service
 
@@ -164,9 +172,9 @@ After=network.target
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/opt/IntNetAdmin
-Environment="PATH=/opt/IntNetAdmin/venv/bin"
-ExecStart=/opt/IntNetAdmin/venv/bin/gunicorn -w 2 -b 0.0.0.0:5000 app:app
+WorkingDirectory=/opt/intnetadmin
+EnvironmentFile=/etc/intnetadmin/intnetadmin.conf
+ExecStart=/opt/intnetadmin/venv/bin/gunicorn -w 2 -b 0.0.0.0:5000 app:app
 Restart=always
 RestartSec=10
 
@@ -177,6 +185,17 @@ WantedBy=multi-user.target
 ```bash
 sudo systemctl enable intnetadmin
 sudo systemctl start intnetadmin
+```
+
+## 🐡 FreeBSD
+
+```bash
+# Install
+sudo ./install.sh
+
+# Enable and start
+sysrc intnetadmin_enable=YES
+service intnetadmin start
 ```
 
 ## 🤝 Contributing
