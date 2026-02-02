@@ -13,7 +13,8 @@
 
 IntNetAdmin is a web-based dashboard for managing DHCP and DNS services on your internal network. It provides a modern, clean interface for viewing and configuring network services, with automatic network scanning and real-time status monitoring.
 
-![Screenshot](https://via.placeholder.com/800x500?text=IntNetAdmin+Dashboard)
+![Screenshot]<img width="1662" height="836" alt="image" src="https://github.com/user-attachments/assets/c9bab5c0-e734-4918-84e6-d7b4633e17e8" />
+
 
 ## Features
 
