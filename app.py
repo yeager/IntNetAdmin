@@ -176,6 +176,7 @@ scanner_running = True
 pending_changes = {
     'dhcp': [],  # List of {action: 'add'|'edit'|'delete', hostname, data, timestamp}
     'dns': [],   # List of {action: 'add'|'edit'|'delete', zone, record, timestamp}
+    'networks': [],  # List of {action: 'add'|'edit'|'delete', network, data, timestamp}
 }
 pending_changes_lock = threading.Lock()
 
@@ -354,8 +355,87 @@ def delete_dhcp_host(hostname):
         })
     return True, 'Staged for activation'
 
+def add_network(network, netmask, range_start=None, range_end=None, gateway=None, dns=None):
+    """Add a new network/subnet to DHCP - stages change"""
+    # Validate IP addresses
+    try:
+        ipaddress.ip_address(network)
+        ipaddress.ip_address(netmask)
+        if range_start:
+            ipaddress.ip_address(range_start)
+        if range_end:
+            ipaddress.ip_address(range_end)
+        if gateway:
+            ipaddress.ip_address(gateway)
+    except ValueError as e:
+        return False, f'Invalid IP address: {e}'
+    
+    with pending_changes_lock:
+        # Check for duplicate network
+        for change in pending_changes['networks']:
+            if change.get('network') == network and change['action'] != 'delete':
+                return False, 'Network already staged'
+        
+        pending_changes['networks'].append({
+            'action': 'add',
+            'network': network,
+            'data': {
+                'netmask': netmask,
+                'range_start': range_start,
+                'range_end': range_end,
+                'gateway': gateway,
+                'dns': dns
+            },
+            'timestamp': datetime.now().isoformat()
+        })
+    return True, 'Staged for activation'
+
+def delete_network(network):
+    """Delete a network/subnet - stages change"""
+    with pending_changes_lock:
+        pending_changes['networks'] = [c for c in pending_changes['networks'] if c.get('network') != network]
+        pending_changes['networks'].append({
+            'action': 'delete',
+            'network': network,
+            'data': {},
+            'timestamp': datetime.now().isoformat()
+        })
+    return True, 'Staged for activation'
+
+def edit_network(network, netmask=None, range_start=None, range_end=None, gateway=None, dns=None):
+    """Edit an existing network/subnet - stages change"""
+    # Validate IP addresses if provided
+    try:
+        if netmask:
+            ipaddress.ip_address(netmask)
+        if range_start:
+            ipaddress.ip_address(range_start)
+        if range_end:
+            ipaddress.ip_address(range_end)
+        if gateway:
+            ipaddress.ip_address(gateway)
+    except ValueError as e:
+        return False, f'Invalid IP address: {e}'
+    
+    with pending_changes_lock:
+        # Remove any existing pending changes for this network
+        pending_changes['networks'] = [c for c in pending_changes['networks'] if c.get('network') != network]
+        pending_changes['networks'].append({
+            'action': 'edit',
+            'network': network,
+            'data': {
+                'netmask': netmask,
+                'range_start': range_start,
+                'range_end': range_end,
+                'gateway': gateway,
+                'dns': dns
+            },
+            'timestamp': datetime.now().isoformat()
+        })
+    return True, 'Staged for activation'
+
 def apply_dhcp_changes():
-    """Apply all pending DHCP changes to disk"""
+    """Apply all pending DHCP changes (hosts and networks) to disk"""
     try:
         with open(CONFIG['dhcp_conf'], 'r') as f:
             content = f.read()
@@ -363,9 +443,11 @@ def apply_dhcp_changes():
         original_content = content
         
         with pending_changes_lock:
-            changes = pending_changes['dhcp'][:]
+            host_changes = pending_changes['dhcp'][:]
+            network_changes = pending_changes['networks'][:]
         
-        for change in changes:
+        # Apply host changes
+        for change in host_changes:
             hostname = change['hostname']
             action = change['action']
             data = change.get('data', {})
@@ -397,6 +479,44 @@ host {hostname} {{
 '''
                 content = content.rstrip() + '\n' + entry
         
+        # Apply network/subnet changes
+        for change in network_changes:
+            network = change['network']
+            action = change['action']
+            data = change.get('data', {})
+            
+            if action == 'delete':
+                # Remove subnet block
+                pattern = rf'subnet\s+{re.escape(network)}\s+netmask\s+[\d.]+\s*\{{[^}}]+\}}\s*'
+                content = re.sub(pattern, '', content)
+            
+            elif action == 'edit':
+                # Find and replace subnet block
+                pattern = rf'subnet\s+{re.escape(network)}\s+netmask\s+[\d.]+\s*\{{[^}}]+\}}'
+                # Build new subnet block
+                netmask = data.get('netmask', '255.255.255.0')
+                subnet_block = f"subnet {network} netmask {netmask} {{\n"
+                if data.get('range_start') and data.get('range_end'):
+                    subnet_block += f"    range {data['range_start']} {data['range_end']};\n"
+                if data.get('gateway'):
+                    subnet_block += f"    option routers {data['gateway']};\n"
+                if data.get('dns'):
+                    subnet_block += f"    option domain-name-servers {data['dns']};\n"
+                subnet_block += "}"
+                content = re.sub(pattern, subnet_block, content)
+            
+            elif action == 'add':
+                # Build subnet block
+                subnet_block = f"\nsubnet {network} netmask {data['netmask']} {{\n"
+                if data.get('range_start') and data.get('range_end'):
+                    subnet_block += f"    range {data['range_start']} {data['range_end']};\n"
+                if data.get('gateway'):
+                    subnet_block += f"    option routers {data['gateway']};\n"
+                if data.get('dns'):
+                    subnet_block += f"    option domain-name-servers {data['dns']};\n"
+                subnet_block += "}\n"
+                content = content.rstrip() + '\n' + subnet_block
+        
         # Write via sudo
         temp_file = f'/tmp/dhcpd.conf.{os.getpid()}'
         with open(temp_file, 'w') as f:
@@ -411,6 +531,7 @@ host {hostname} {{
             # Clear pending changes
             with pending_changes_lock:
                 pending_changes['dhcp'] = []
+                pending_changes['networks'] = []
         
         return success, stderr if not success else 'OK', original_content, content
     except Exception as e:
@@ -1103,10 +1224,57 @@ def api_leases():
     
     return jsonify({'leases': leases})
 
-@app.route('/api/networks')
+@app.route('/api/networks', methods=['GET', 'POST'])
 @login_required
 def api_networks():
+    if request.method == 'POST':
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        network = data.get('network')
+        netmask = data.get('netmask')
+        range_start = data.get('range_start')
+        range_end = data.get('range_end')
+        gateway = data.get('gateway')
+        dns = data.get('dns')
+        
+        if not network or not netmask:
+            return jsonify({'error': 'Network and netmask are required'}), 400
+        
+        success, message = add_network(network, netmask, range_start, range_end, gateway, dns)
+        if success:
+            return jsonify({'status': 'staged', 'message': message})
+        return jsonify({'error': message}), 400
+    
     return jsonify({'networks': get_networks()})
+
+@app.route('/api/networks/<network>', methods=['PUT', 'DELETE'])
+@login_required
+def api_modify_network(network):
+    """Edit or delete a network/subnet"""
+    if request.method == 'DELETE':
+        success, message = delete_network(network)
+        if success:
+            return jsonify({'status': 'staged', 'message': message})
+        return jsonify({'error': message}), 400
+    
+    # PUT - edit network
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    success, message = edit_network(
+        network,
+        netmask=data.get('netmask'),
+        range_start=data.get('range_start'),
+        range_end=data.get('range_end'),
+        gateway=data.get('gateway'),
+        dns=data.get('dns')
+    )
+    if success:
+        return jsonify({'status': 'staged', 'message': message})
+    return jsonify({'error': message}), 400
 
 @app.route('/api/scan')
 @login_required
@@ -1148,7 +1316,8 @@ def api_get_changes():
         return jsonify({
             'dhcp': pending_changes['dhcp'],
             'dns': pending_changes['dns'],
-            'total': len(pending_changes['dhcp']) + len(pending_changes['dns'])
+            'networks': pending_changes['networks'],
+            'total': len(pending_changes['dhcp']) + len(pending_changes['dns']) + len(pending_changes['networks'])
         })
 
 @app.route('/api/changes/apply', methods=['POST'])
@@ -1156,18 +1325,22 @@ def api_get_changes():
 @sudo_required
 def api_apply_changes():
     """Apply all pending changes to disk"""
-    results = {'dhcp': None, 'dns': None}
+    results = {'dhcp': None, 'dns': None, 'networks': None}
     
     with pending_changes_lock:
         has_dhcp = len(pending_changes['dhcp']) > 0
+        has_networks = len(pending_changes['networks']) > 0
         has_dns = len(pending_changes['dns']) > 0
     
-    if has_dhcp:
+    # DHCP hosts and networks are applied together
+    if has_dhcp or has_networks:
         success, msg, old_content, new_content = apply_dhcp_changes()
         results['dhcp'] = {
             'status': 'ok' if success else 'failed',
             'message': msg
         }
+        if has_networks:
+            results['networks'] = results['dhcp']  # Same operation
     
     if has_dns:
         dns_results = apply_dns_changes()
@@ -1182,13 +1355,14 @@ def api_discard_changes():
     with pending_changes_lock:
         pending_changes['dhcp'] = []
         pending_changes['dns'] = []
+        pending_changes['networks'] = []
     return jsonify({'status': 'ok', 'message': 'Changes discarded'})
 
 @app.route('/api/changes/preview')
 @login_required
 def api_preview_changes():
     """Preview what changes will be made"""
-    preview = {'dhcp': [], 'dns': []}
+    preview = {'dhcp': [], 'dns': [], 'networks': []}
     
     with pending_changes_lock:
         for change in pending_changes['dhcp']:
@@ -1202,6 +1376,20 @@ def api_preview_changes():
                 preview['dhcp'].append(f"~ Edit host '{hostname}': MAC={data.get('mac')}, IP={data.get('ip')}")
             elif action == 'delete':
                 preview['dhcp'].append(f"- Delete host '{hostname}'")
+        
+        for change in pending_changes['networks']:
+            action = change['action']
+            network = change['network']
+            data = change.get('data', {})
+            
+            if action == 'add':
+                range_info = f", range {data.get('range_start')}-{data.get('range_end')}" if data.get('range_start') else ""
+                preview['networks'].append(f"+ Add network '{network}/{data.get('netmask')}'{range_info}")
+            elif action == 'edit':
+                range_info = f", range {data.get('range_start')}-{data.get('range_end')}" if data.get('range_start') else ""
+                preview['networks'].append(f"~ Edit network '{network}'{range_info}")
+            elif action == 'delete':
+                preview['networks'].append(f"- Delete network '{network}'")
         
         for change in pending_changes['dns']:
             action = change['action']

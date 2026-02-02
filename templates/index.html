@@ -902,6 +902,7 @@
                                     <th data-i18n="range">DHCP Range</th>
                                     <th data-i18n="gateway">Gateway</th>
                                     <th data-i18n="dns">DNS</th>
+                                    <th data-i18n="actions">Actions</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -1105,6 +1106,16 @@
                         <input type="text" class="form-input" id="new-net-end" placeholder="192.168.10.200">
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="gateway">Gateway</label>
+                        <input type="text" class="form-input" id="new-net-gateway" placeholder="192.168.10.1">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="dns">DNS Server</label>
+                        <input type="text" class="form-input" id="new-net-dns" placeholder="192.168.10.1">
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideModal('add-network-modal')" data-i18n="cancel">Cancel</button>
@@ -1169,6 +1180,51 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideModal('edit-dns-modal')" data-i18n="cancel">Cancel</button>
                 <button class="btn btn-primary" onclick="saveDnsRecord()" data-i18n="save">Save</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Network Modal -->
+    <div class="modal-overlay" id="edit-network-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 data-i18n="edit_network">Edit Network</h2>
+                <button class="modal-close" onclick="hideModal('edit-network-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-net-address">
+                <div class="form-group">
+                    <label data-i18n="network">Network Address</label>
+                    <input type="text" class="form-input" id="edit-net-display" disabled>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="netmask">Netmask</label>
+                    <input type="text" class="form-input" id="edit-net-mask" placeholder="255.255.255.0">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="range_start">DHCP Range Start</label>
+                        <input type="text" class="form-input" id="edit-net-start" placeholder="192.168.10.100">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="range_end">DHCP Range End</label>
+                        <input type="text" class="form-input" id="edit-net-end" placeholder="192.168.10.200">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="gateway">Gateway</label>
+                        <input type="text" class="form-input" id="edit-net-gateway" placeholder="192.168.10.1">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="dns">DNS Server</label>
+                        <input type="text" class="form-input" id="edit-net-dns" placeholder="192.168.10.1">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal('edit-network-modal')" data-i18n="cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="saveNetwork()" data-i18n="save">Save</button>
             </div>
         </div>
     </div>
@@ -2111,15 +2167,22 @@
             const data = await res.json();
             
             const tbody = document.querySelector('#networks-table tbody');
-            tbody.innerHTML = data.networks?.map(n => `
+            tbody.innerHTML = data.networks?.map(n => {
+                const gateway = n.options?.routers || '';
+                const dns = n.options?.['domain-name-servers'] || '';
+                return `
                 <tr>
                     <td><code>${n.network}</code></td>
                     <td><code>${n.netmask}</code></td>
                     <td>${n.range_start && n.range_end ? `${n.range_start} - ${n.range_end}` : '-'}</td>
-                    <td>${n.options?.routers || '-'}</td>
-                    <td>${n.options?.['domain-name-servers'] || '-'}</td>
+                    <td>${gateway || '-'}</td>
+                    <td>${dns || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="editNetwork('${n.network}', '${n.netmask}', '${n.range_start || ''}', '${n.range_end || ''}', '${gateway}', '${dns}')" title="${t('edit')}">✏️</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteNetwork('${n.network}')" title="${t('delete')}">🗑️</button>
+                    </td>
                 </tr>
-            `).join('') || '<tr><td colspan="5">No networks configured</td></tr>';
+            `}).join('') || '<tr><td colspan="6">No networks configured</td></tr>';
         }
         
         async function loadServices() {
@@ -2507,11 +2570,114 @@
         }
         
         // ========================================================================
-        // Add Network (placeholder)
+        // Add Network
         // ========================================================================
         async function addNetwork() {
-            showToast('Network configuration requires manual dhcpd.conf editing', 'error');
-            hideModal('add-network-modal');
+            const network = document.getElementById('new-net-address').value.trim();
+            const netmask = document.getElementById('new-net-mask').value.trim();
+            const rangeStart = document.getElementById('new-net-start').value.trim();
+            const rangeEnd = document.getElementById('new-net-end').value.trim();
+            const gateway = document.getElementById('new-net-gateway').value.trim();
+            const dns = document.getElementById('new-net-dns').value.trim();
+            
+            if (!network || !netmask) {
+                showToast(t('fill_required_fields'), 'error');
+                return;
+            }
+            
+            const res = await fetch('/api/networks', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    network,
+                    netmask,
+                    range_start: rangeStart || null,
+                    range_end: rangeEnd || null,
+                    gateway: gateway || null,
+                    dns: dns || null
+                })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                showToast(t('change_staged'));
+                hideModal('add-network-modal');
+                // Clear form
+                document.getElementById('new-net-address').value = '';
+                document.getElementById('new-net-mask').value = '';
+                document.getElementById('new-net-start').value = '';
+                document.getElementById('new-net-end').value = '';
+                document.getElementById('new-net-gateway').value = '';
+                document.getElementById('new-net-dns').value = '';
+                loadNetworks();
+                updatePendingBadge();
+            } else {
+                showToast(data.error || 'Failed to add network', 'error');
+            }
+        }
+        
+        async function deleteNetwork(network) {
+            if (!confirm(t('confirm_delete_network') || `Delete network ${network}?`)) {
+                return;
+            }
+            
+            const res = await fetch(`/api/networks/${encodeURIComponent(network)}`, {
+                method: 'DELETE'
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                showToast(t('change_staged'));
+                loadNetworks();
+                updatePendingBadge();
+            } else {
+                showToast(data.error || 'Failed to delete network', 'error');
+            }
+        }
+        
+        function editNetwork(network, netmask, rangeStart, rangeEnd, gateway, dns) {
+            document.getElementById('edit-net-address').value = network;
+            document.getElementById('edit-net-display').value = network;
+            document.getElementById('edit-net-mask').value = netmask || '';
+            document.getElementById('edit-net-start').value = rangeStart || '';
+            document.getElementById('edit-net-end').value = rangeEnd || '';
+            document.getElementById('edit-net-gateway').value = gateway || '';
+            document.getElementById('edit-net-dns').value = dns || '';
+            showModal('edit-network-modal');
+        }
+        
+        async function saveNetwork() {
+            const network = document.getElementById('edit-net-address').value;
+            const netmask = document.getElementById('edit-net-mask').value.trim();
+            const rangeStart = document.getElementById('edit-net-start').value.trim();
+            const rangeEnd = document.getElementById('edit-net-end').value.trim();
+            const gateway = document.getElementById('edit-net-gateway').value.trim();
+            const dns = document.getElementById('edit-net-dns').value.trim();
+            
+            const res = await fetch(`/api/networks/${encodeURIComponent(network)}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    netmask: netmask || null,
+                    range_start: rangeStart || null,
+                    range_end: rangeEnd || null,
+                    gateway: gateway || null,
+                    dns: dns || null
+                })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                showToast(t('change_staged'));
+                hideModal('edit-network-modal');
+                loadNetworks();
+                updatePendingBadge();
+            } else {
+                showToast(data.error || 'Failed to edit network', 'error');
+            }
         }
         
         // ========================================================================
