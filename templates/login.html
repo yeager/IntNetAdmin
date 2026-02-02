@@ -76,7 +76,7 @@
             font-weight: 500;
         }
         
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 0.875rem 1rem;
             border-radius: 10px;
@@ -87,7 +87,7 @@
             transition: all 0.2s;
         }
         
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
@@ -145,26 +145,25 @@
             gap: 0.375rem;
         }
         
-        .lang-switch {
+        .lang-select {
             display: flex;
             justify-content: center;
-            gap: 0.5rem;
             margin-top: 1.5rem;
         }
         
-        .lang-btn {
-            background: none;
-            border: 2px solid transparent;
-            font-size: 1.5rem;
+        .lang-dropdown {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
             cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 6px;
-            opacity: 0.5;
-            transition: all 0.2s;
+            min-width: 160px;
         }
         
-        .lang-btn:hover, .lang-btn.active {
-            opacity: 1;
+        .lang-dropdown:focus {
+            outline: none;
             border-color: var(--primary);
         }
         
@@ -245,9 +244,19 @@
                 <span id="pam-note-text">Authenticated via system PAM</span>
             </p>
             
-            <div class="lang-switch">
-                <button class="lang-btn active" data-lang="en" title="English">🇬🇧</button>
-                <button class="lang-btn" data-lang="sv" title="Svenska">🇸🇪</button>
+            <div class="lang-select">
+                <select class="lang-dropdown" id="lang-select">
+                    <option value="en">🇬🇧 English</option>
+                    <option value="sv">🇸🇪 Svenska</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="it">🇮🇹 Italiano</option>
+                    <option value="nl">🇳🇱 Nederlands</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="no">🇳🇴 Norsk</option>
+                    <option value="da">🇩🇰 Dansk</option>
+                </select>
             </div>
         </div>
         
@@ -264,7 +273,9 @@
                 password: 'Password',
                 signin: 'Sign In',
                 pam_note: 'Authenticated via system PAM',
-                invalid_credentials: 'Invalid credentials'
+                invalid_credentials: 'Invalid credentials',
+                placeholder_user: 'Enter your username',
+                placeholder_pass: 'Enter your password'
             },
             sv: {
                 slogan: 'Hantera ditt interna nätverk enkelt',
@@ -272,42 +283,118 @@
                 password: 'Lösenord',
                 signin: 'Logga in',
                 pam_note: 'Autentisering via system-PAM',
-                invalid_credentials: 'Ogiltiga uppgifter'
+                invalid_credentials: 'Ogiltiga uppgifter',
+                placeholder_user: 'Ange ditt användarnamn',
+                placeholder_pass: 'Ange ditt lösenord'
+            },
+            de: {
+                slogan: 'Verwalten Sie Ihr internes Netzwerk mit Leichtigkeit',
+                username: 'Benutzername',
+                password: 'Passwort',
+                signin: 'Anmelden',
+                pam_note: 'Authentifizierung über System-PAM',
+                invalid_credentials: 'Ungültige Anmeldedaten',
+                placeholder_user: 'Benutzername eingeben',
+                placeholder_pass: 'Passwort eingeben'
+            },
+            fr: {
+                slogan: 'Gérez votre réseau interne facilement',
+                username: "Nom d'utilisateur",
+                password: 'Mot de passe',
+                signin: 'Se connecter',
+                pam_note: 'Authentification via PAM système',
+                invalid_credentials: 'Identifiants invalides',
+                placeholder_user: "Entrez votre nom d'utilisateur",
+                placeholder_pass: 'Entrez votre mot de passe'
+            },
+            es: {
+                slogan: 'Gestiona tu red interna con facilidad',
+                username: 'Usuario',
+                password: 'Contraseña',
+                signin: 'Iniciar sesión',
+                pam_note: 'Autenticación vía PAM del sistema',
+                invalid_credentials: 'Credenciales inválidas',
+                placeholder_user: 'Ingrese su usuario',
+                placeholder_pass: 'Ingrese su contraseña'
+            },
+            it: {
+                slogan: 'Gestisci la tua rete interna con facilità',
+                username: 'Nome utente',
+                password: 'Password',
+                signin: 'Accedi',
+                pam_note: 'Autenticazione tramite PAM di sistema',
+                invalid_credentials: 'Credenziali non valide',
+                placeholder_user: 'Inserisci il tuo nome utente',
+                placeholder_pass: 'Inserisci la tua password'
+            },
+            nl: {
+                slogan: 'Beheer uw interne netwerk met gemak',
+                username: 'Gebruikersnaam',
+                password: 'Wachtwoord',
+                signin: 'Inloggen',
+                pam_note: 'Authenticatie via systeem-PAM',
+                invalid_credentials: 'Ongeldige inloggegevens',
+                placeholder_user: 'Voer uw gebruikersnaam in',
+                placeholder_pass: 'Voer uw wachtwoord in'
+            },
+            pt: {
+                slogan: 'Gerencie sua rede interna com facilidade',
+                username: 'Usuário',
+                password: 'Senha',
+                signin: 'Entrar',
+                pam_note: 'Autenticação via PAM do sistema',
+                invalid_credentials: 'Credenciais inválidas',
+                placeholder_user: 'Digite seu usuário',
+                placeholder_pass: 'Digite sua senha'
+            },
+            no: {
+                slogan: 'Administrer ditt interne nettverk enkelt',
+                username: 'Brukernavn',
+                password: 'Passord',
+                signin: 'Logg inn',
+                pam_note: 'Autentisering via system-PAM',
+                invalid_credentials: 'Ugyldige legitimasjoner',
+                placeholder_user: 'Skriv inn brukernavn',
+                placeholder_pass: 'Skriv inn passord'
+            },
+            da: {
+                slogan: 'Administrer dit interne netværk nemt',
+                username: 'Brugernavn',
+                password: 'Adgangskode',
+                signin: 'Log ind',
+                pam_note: 'Godkendelse via system-PAM',
+                invalid_credentials: 'Ugyldige legitimationsoplysninger',
+                placeholder_user: 'Indtast dit brugernavn',
+                placeholder_pass: 'Indtast din adgangskode'
             }
         };
         
         let currentLang = localStorage.getItem('lang') || 'en';
         
         function applyTranslations() {
-            const t = translations[currentLang];
+            const t = translations[currentLang] || translations.en;
             document.getElementById('slogan').textContent = t.slogan;
             document.getElementById('label-username').textContent = t.username;
             document.getElementById('label-password').textContent = t.password;
             document.getElementById('submit-btn').textContent = t.signin;
             document.getElementById('pam-note-text').textContent = t.pam_note;
-            
-            document.getElementById('username').placeholder = currentLang === 'sv' ? 'Ange ditt användarnamn' : 'Enter your username';
-            document.getElementById('password').placeholder = currentLang === 'sv' ? 'Ange ditt lösenord' : 'Enter your password';
+            document.getElementById('username').placeholder = t.placeholder_user;
+            document.getElementById('password').placeholder = t.placeholder_pass;
             
             const errorText = document.getElementById('error-text');
-            if (errorText && errorText.textContent === 'Invalid credentials') {
+            if (errorText) {
                 errorText.textContent = t.invalid_credentials;
             }
         }
         
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentLang = btn.dataset.lang;
-                localStorage.setItem('lang', currentLang);
-                applyTranslations();
-            });
+        document.getElementById('lang-select').addEventListener('change', (e) => {
+            currentLang = e.target.value;
+            localStorage.setItem('lang', currentLang);
+            applyTranslations();
         });
         
         // Initialize
-        document.querySelector(`.lang-btn[data-lang="${currentLang}"]`)?.classList.add('active');
-        document.querySelector(`.lang-btn:not([data-lang="${currentLang}"])`)?.classList.remove('active');
+        document.getElementById('lang-select').value = currentLang;
         applyTranslations();
     </script>
 </body>
