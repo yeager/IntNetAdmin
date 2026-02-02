@@ -1224,6 +1224,54 @@ def api_leases():
     
     return jsonify({'leases': leases})
 
+@app.route('/api/leases/promote', methods=['POST'])
+@login_required
+def api_promote_lease():
+    """Promote a DHCP lease to static reservation with optional DNS record"""
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    ip = data.get('ip')
+    mac = data.get('mac')
+    hostname = data.get('hostname')
+    fqdn = data.get('fqdn')  # e.g., "myhost.home.lan"
+    zone = data.get('zone')  # e.g., "home.lan"
+    create_ptr = data.get('create_ptr', False)
+    
+    if not ip or not mac or not hostname:
+        return jsonify({'error': 'IP, MAC and hostname are required'}), 400
+    
+    results = {'dhcp': None, 'dns': None, 'ptr': None}
+    
+    # 1. Create DHCP static reservation
+    success, msg = add_dhcp_host(hostname, mac, ip)
+    results['dhcp'] = {'status': 'staged' if success else 'failed', 'message': msg}
+    
+    # 2. Create DNS A record if zone is provided
+    if zone and fqdn:
+        # Extract the hostname part from FQDN for the record name
+        record_name = fqdn.replace(f'.{zone}', '') if fqdn.endswith(f'.{zone}') else hostname
+        success_dns, msg_dns = add_dns_record(zone, record_name, 'A', ip)
+        results['dns'] = {'status': 'staged' if success_dns else 'failed', 'message': msg_dns}
+        
+        # 3. Create PTR record if requested
+        if create_ptr:
+            # Calculate reverse zone and PTR record name
+            ip_parts = ip.split('.')
+            ptr_name = ip_parts[3]  # Last octet
+            reverse_zone = f"{ip_parts[2]}.{ip_parts[1]}.{ip_parts[0]}.in-addr.arpa"
+            
+            # Check if reverse zone exists
+            reverse_file = os.path.join(CONFIG['bind_dir'], f'db.{reverse_zone}')
+            if os.path.exists(reverse_file):
+                success_ptr, msg_ptr = add_dns_record(reverse_zone, ptr_name, 'PTR', f'{fqdn}.')
+                results['ptr'] = {'status': 'staged' if success_ptr else 'failed', 'message': msg_ptr}
+            else:
+                results['ptr'] = {'status': 'skipped', 'message': f'Reverse zone {reverse_zone} not found'}
+    
+    return jsonify(results)
+
 @app.route('/api/networks', methods=['GET', 'POST'])
 @login_required
 def api_networks():

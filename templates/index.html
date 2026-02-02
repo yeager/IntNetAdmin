@@ -876,6 +876,7 @@
                                     <th data-i18n="hostname">Hostname</th>
                                     <th data-i18n="ends">Expires</th>
                                     <th data-i18n="state">State</th>
+                                    <th data-i18n="actions">Actions</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -1229,6 +1230,59 @@
         </div>
     </div>
     
+    <!-- Promote Lease to Static Modal -->
+    <div class="modal-overlay" id="promote-lease-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>📌 <span data-i18n="make_static">Make Static</span></h2>
+                <button class="modal-close" onclick="hideModal('promote-lease-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.875rem;" data-i18n="promote_desc">
+                    Create a static DHCP reservation and optionally add DNS records for this lease.
+                </p>
+                <input type="hidden" id="promote-ip">
+                <input type="hidden" id="promote-mac">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="ip_address">IP Address</label>
+                        <input type="text" class="form-input" id="promote-ip-display" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="mac_address">MAC Address</label>
+                        <input type="text" class="form-input" id="promote-mac-display" disabled>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="hostname">Hostname</label>
+                    <input type="text" class="form-input" id="promote-hostname" placeholder="myserver">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="dns_zone">DNS Zone (optional)</label>
+                        <select class="form-input" id="promote-zone">
+                            <option value="">-- No DNS --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="fqdn">FQDN</label>
+                        <input type="text" class="form-input" id="promote-fqdn" placeholder="myserver.home.lan" disabled>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="promote-ptr">
+                        <span data-i18n="create_ptr">Create PTR record (reverse DNS)</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal('promote-lease-modal')" data-i18n="cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="promoteLease()" data-i18n="make_static">Make Static</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Activate Changes Modal -->
     <div class="modal-overlay" id="activate-modal">
         <div class="modal" style="max-width: 600px;">
@@ -1391,7 +1445,17 @@
                 changes_applied: 'Changes applied successfully',
                 changes_discarded: 'Changes discarded',
                 change_staged: 'Change staged for activation',
-                confirm_delete: 'Are you sure you want to delete this?'
+                confirm_delete: 'Are you sure you want to delete this?',
+                make_static: 'Make Static',
+                promote_desc: 'Create a static DHCP reservation and optionally add DNS records.',
+                dns_zone: 'DNS Zone',
+                fqdn: 'FQDN',
+                create_ptr: 'Create PTR record (reverse DNS)',
+                hostname_required: 'Hostname is required',
+                dhcp_staged: 'DHCP reservation staged',
+                dns_staged: 'DNS record staged',
+                ptr_staged: 'PTR record staged',
+                edit_network: 'Edit Network'
             },
             sv: {
                 slogan: 'Hantera ditt interna nätverk enkelt',
@@ -1502,7 +1566,17 @@
                 changes_applied: 'Ändringar verkställda',
                 changes_discarded: 'Ändringar kastade',
                 change_staged: 'Ändring förberedd för aktivering',
-                confirm_delete: 'Är du säker på att du vill ta bort detta?'
+                confirm_delete: 'Är du säker på att du vill ta bort detta?',
+                make_static: 'Gör statisk',
+                promote_desc: 'Skapa en statisk DHCP-reservation och lägg valfritt till DNS-poster.',
+                dns_zone: 'DNS-zon',
+                fqdn: 'FQDN',
+                create_ptr: 'Skapa PTR-post (omvänd DNS)',
+                hostname_required: 'Värdnamn krävs',
+                dhcp_staged: 'DHCP-reservation förberedd',
+                dns_staged: 'DNS-post förberedd',
+                ptr_staged: 'PTR-post förberedd',
+                edit_network: 'Redigera nätverk'
             },
             de: {
                 slogan: 'Verwalten Sie Ihr internes Netzwerk mit Leichtigkeit',
@@ -2158,8 +2232,11 @@
                     <td>${l.hostname || '-'}</td>
                     <td>${l.ends || '-'}</td>
                     <td><span class="badge ${l.state === 'active' ? 'online' : 'offline'}">${l.state || '-'}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="showPromoteModal('${l.ip}', '${l.mac || ''}', '${l.hostname || ''}')" title="${t('make_static') || 'Make Static'}">📌</button>
+                    </td>
                 </tr>
-            `).join('') || '<tr><td colspan="6">No leases found</td></tr>';
+            `).join('') || '<tr><td colspan="7">No leases found</td></tr>';
         }
         
         async function loadNetworks() {
@@ -2677,6 +2754,102 @@
                 updatePendingBadge();
             } else {
                 showToast(data.error || 'Failed to edit network', 'error');
+            }
+        }
+        
+        // ========================================================================
+        // Promote Lease to Static
+        // ========================================================================
+        async function showPromoteModal(ip, mac, hostname) {
+            document.getElementById('promote-ip').value = ip;
+            document.getElementById('promote-mac').value = mac;
+            document.getElementById('promote-ip-display').value = ip;
+            document.getElementById('promote-mac-display').value = mac;
+            document.getElementById('promote-hostname').value = hostname || '';
+            document.getElementById('promote-fqdn').value = '';
+            document.getElementById('promote-ptr').checked = false;
+            
+            // Load DNS zones into dropdown
+            const zoneSelect = document.getElementById('promote-zone');
+            zoneSelect.innerHTML = '<option value="">-- No DNS --</option>';
+            
+            try {
+                const res = await fetch('/api/dns');
+                const data = await res.json();
+                data.zones?.filter(z => !z.is_reverse).forEach(zone => {
+                    const opt = document.createElement('option');
+                    opt.value = zone.name;
+                    opt.textContent = zone.name;
+                    zoneSelect.appendChild(opt);
+                });
+            } catch (e) {
+                console.error('Failed to load zones:', e);
+            }
+            
+            showModal('promote-lease-modal');
+        }
+        
+        // Update FQDN when hostname or zone changes
+        document.getElementById('promote-hostname')?.addEventListener('input', updateFqdn);
+        document.getElementById('promote-zone')?.addEventListener('change', updateFqdn);
+        
+        function updateFqdn() {
+            const hostname = document.getElementById('promote-hostname').value.trim();
+            const zone = document.getElementById('promote-zone').value;
+            const fqdnInput = document.getElementById('promote-fqdn');
+            
+            if (zone && hostname) {
+                fqdnInput.value = `${hostname}.${zone}`;
+                fqdnInput.disabled = false;
+            } else {
+                fqdnInput.value = '';
+                fqdnInput.disabled = true;
+            }
+        }
+        
+        async function promoteLease() {
+            const ip = document.getElementById('promote-ip').value;
+            const mac = document.getElementById('promote-mac').value;
+            const hostname = document.getElementById('promote-hostname').value.trim();
+            const zone = document.getElementById('promote-zone').value;
+            const fqdn = document.getElementById('promote-fqdn').value.trim();
+            const createPtr = document.getElementById('promote-ptr').checked;
+            
+            if (!hostname) {
+                showToast(t('hostname_required') || 'Hostname is required', 'error');
+                return;
+            }
+            
+            const res = await fetch('/api/leases/promote', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    ip,
+                    mac,
+                    hostname,
+                    zone: zone || null,
+                    fqdn: fqdn || null,
+                    create_ptr: createPtr
+                })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                let msg = t('dhcp_staged') || 'DHCP reservation staged';
+                if (data.dns?.status === 'staged') {
+                    msg += ', ' + (t('dns_staged') || 'DNS record staged');
+                }
+                if (data.ptr?.status === 'staged') {
+                    msg += ', ' + (t('ptr_staged') || 'PTR record staged');
+                }
+                showToast(msg);
+                hideModal('promote-lease-modal');
+                loadLeases();
+                loadDHCP();
+                updatePendingBadge();
+            } else {
+                showToast(data.error || 'Failed to promote lease', 'error');
             }
         }
         
