@@ -2695,7 +2695,7 @@
         }
         
         async function deleteNetwork(network) {
-            if (!confirm(t('confirm_delete_network') || `Delete network ${network}?`)) {
+            if (!confirm(t('confirm_delete') + '\n\n' + network)) {
                 return;
             }
             
