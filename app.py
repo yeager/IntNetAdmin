@@ -43,14 +43,120 @@ DEFAULT_CONFIG = {
 }
 
 # Predefined allowed networks for scanning (security: prevent scanning arbitrary networks)
-ALLOWED_NETWORKS = [
-    '192.168.2.0/23',
-    '192.168.2.0/24',
-    '192.168.3.0/24',
-    '10.0.0.0/24',
-    '10.0.1.0/24',
-    '172.16.0.0/24',
-]
+# Configure via environment variable ALLOWED_NETWORKS (comma-separated) or edit this list
+ALLOWED_NETWORKS = [n.strip() for n in os.environ.get('ALLOWED_NETWORKS', '').split(',') if n.strip()]
+
+# ============================================================================
+# Input Sanitization
+# ============================================================================
+
+def sanitize_string(value, max_length=255, allow_chars=None):
+    """Sanitize string input to prevent XSS and injection attacks"""
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        value = str(value)
+    
+    # Strip whitespace
+    value = value.strip()
+    
+    # Truncate to max length
+    value = value[:max_length]
+    
+    # Remove null bytes
+    value = value.replace('\x00', '')
+    
+    # HTML encode dangerous characters
+    value = value.replace('&', '&amp;')
+    value = value.replace('<', '&lt;')
+    value = value.replace('>', '&gt;')
+    value = value.replace('"', '&quot;')
+    value = value.replace("'", '&#x27;')
+    
+    # If specific characters allowed, filter to only those
+    if allow_chars:
+        value = ''.join(c for c in value if c in allow_chars)
+    
+    return value
+
+def sanitize_hostname(value):
+    """Sanitize hostname - only alphanumeric, hyphens, dots"""
+    if not value:
+        return None
+    value = str(value).strip().lower()[:253]
+    # RFC 1123: alphanumeric, hyphens, dots
+    allowed = 'abcdefghijklmnopqrstuvwxyz0123456789-.'
+    value = ''.join(c for c in value if c in allowed)
+    # Remove leading/trailing hyphens and dots
+    value = value.strip('-.')
+    return value if value else None
+
+def sanitize_mac(value):
+    """Sanitize MAC address - only hex and colons"""
+    if not value:
+        return None
+    value = str(value).strip().lower()[:17]
+    allowed = '0123456789abcdef:'
+    value = ''.join(c for c in value if c in allowed)
+    return value if value else None
+
+def sanitize_ip(value):
+    """Sanitize IP address - validate format"""
+    if not value:
+        return None
+    value = str(value).strip()[:45]  # Max IPv6 length
+    allowed = '0123456789.:'
+    value = ''.join(c for c in value if c in allowed)
+    try:
+        ipaddress.ip_address(value)
+        return value
+    except ValueError:
+        return None
+
+def sanitize_cidr(value):
+    """Sanitize CIDR notation - validate format"""
+    if not value:
+        return None
+    value = str(value).strip()[:49]
+    allowed = '0123456789./:'
+    value = ''.join(c for c in value if c in allowed)
+    try:
+        ipaddress.ip_network(value, strict=False)
+        return value
+    except ValueError:
+        return None
+
+def sanitize_email(value):
+    """Sanitize email address"""
+    if not value:
+        return None
+    value = str(value).strip().lower()[:254]
+    # Basic email char whitelist
+    allowed = 'abcdefghijklmnopqrstuvwxyz0123456789@._+-'
+    value = ''.join(c for c in value if c in allowed)
+    if '@' not in value or '.' not in value:
+        return None
+    return value
+
+def sanitize_int(value, min_val=None, max_val=None, default=0):
+    """Sanitize integer input"""
+    try:
+        value = int(value)
+        if min_val is not None:
+            value = max(min_val, value)
+        if max_val is not None:
+            value = min(max_val, value)
+        return value
+    except (ValueError, TypeError):
+        return default
+
+def sanitize_dns_record_type(value):
+    """Sanitize DNS record type"""
+    if not value:
+        return None
+    value = str(value).strip().upper()[:10]
+    valid_types = ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'PTR', 'SOA', 'SRV']
+    return value if value in valid_types else None
 
 # Runtime config (can be changed via settings)
 CONFIG = dict(DEFAULT_CONFIG)
@@ -839,24 +945,20 @@ def api_dhcp():
 @login_required
 def api_add_dhcp_host():
     """Add a new DHCP static mapping (staged)"""
-    data = request.json
-    hostname = data.get('hostname', '').strip()
-    mac = data.get('mac', '').strip().lower()
-    ip = data.get('ip', '').strip()
+    data = request.json or {}
+    
+    # Sanitize inputs
+    hostname = sanitize_hostname(data.get('hostname'))
+    mac = sanitize_mac(data.get('mac'))
+    ip = sanitize_ip(data.get('ip'))
     
     # Validation
     if not hostname or not mac or not ip:
-        return jsonify({'error': 'Missing required fields'}), 400
+        return jsonify({'error': 'Missing or invalid required fields'}), 400
     
     # Validate MAC format
     if not re.match(r'^([0-9a-f]{2}:){5}[0-9a-f]{2}$', mac):
         return jsonify({'error': 'Invalid MAC address format'}), 400
-    
-    # Validate IP
-    try:
-        ipaddress.ip_address(ip)
-    except ValueError:
-        return jsonify({'error': 'Invalid IP address'}), 400
     
     success, msg = add_dhcp_host(hostname, mac, ip)
     
@@ -869,18 +971,17 @@ def api_add_dhcp_host():
 @login_required
 def api_edit_dhcp_host(hostname):
     """Edit an existing DHCP host (staged)"""
-    data = request.json
-    mac = data.get('mac', '').strip().lower() if data.get('mac') else None
-    ip = data.get('ip', '').strip() if data.get('ip') else None
+    # Sanitize URL parameter
+    hostname = sanitize_hostname(hostname)
+    if not hostname:
+        return jsonify({'error': 'Invalid hostname'}), 400
+    
+    data = request.json or {}
+    mac = sanitize_mac(data.get('mac'))
+    ip = sanitize_ip(data.get('ip'))
     
     if mac and not re.match(r'^([0-9a-f]{2}:){5}[0-9a-f]{2}$', mac):
         return jsonify({'error': 'Invalid MAC address format'}), 400
-    
-    if ip:
-        try:
-            ipaddress.ip_address(ip)
-        except ValueError:
-            return jsonify({'error': 'Invalid IP address'}), 400
     
     success, msg = edit_dhcp_host(hostname, mac, ip)
     return jsonify({'status': 'ok', 'message': msg, 'pending': True})
@@ -889,6 +990,11 @@ def api_edit_dhcp_host(hostname):
 @login_required
 def api_delete_dhcp_host(hostname):
     """Delete a DHCP host (staged)"""
+    # Sanitize URL parameter
+    hostname = sanitize_hostname(hostname)
+    if not hostname:
+        return jsonify({'error': 'Invalid hostname'}), 400
+    
     success, msg = delete_dhcp_host(hostname)
     return jsonify({'status': 'ok', 'message': msg, 'pending': True})
 
@@ -912,14 +1018,16 @@ def api_dns():
 @sudo_required
 def api_create_zone():
     """Create a new DNS zone"""
-    data = request.json
-    zone_name = data.get('name', '').strip()
-    soa_ns = data.get('soa_ns', '').strip()
-    soa_email = data.get('soa_email', '').strip()
-    ttl = int(data.get('ttl', 86400))
+    data = request.json or {}
+    
+    # Sanitize inputs
+    zone_name = sanitize_hostname(data.get('name'))
+    soa_ns = sanitize_hostname(data.get('soa_ns'))
+    soa_email = sanitize_email(data.get('soa_email'))
+    ttl = sanitize_int(data.get('ttl'), min_val=60, max_val=604800, default=86400)
     
     if not zone_name or not soa_ns or not soa_email:
-        return jsonify({'error': 'Missing required fields'}), 400
+        return jsonify({'error': 'Missing or invalid required fields'}), 400
     
     success, msg = create_zone_file(zone_name, soa_ns, soa_email, ttl)
     
@@ -932,16 +1040,18 @@ def api_create_zone():
 @login_required
 def api_add_dns_record(zone):
     """Add a DNS record (staged)"""
-    data = request.json
-    name = data.get('name', '').strip()
-    rtype = data.get('type', '').strip().upper()
-    value = data.get('value', '').strip()
+    # Sanitize URL parameter
+    zone = sanitize_hostname(zone)
+    if not zone:
+        return jsonify({'error': 'Invalid zone name'}), 400
+    
+    data = request.json or {}
+    name = sanitize_hostname(data.get('name'))
+    rtype = sanitize_dns_record_type(data.get('type'))
+    value = sanitize_string(data.get('value'), max_length=255)
     
     if not name or not rtype or not value:
-        return jsonify({'error': 'Missing required fields'}), 400
-    
-    if rtype not in ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'PTR']:
-        return jsonify({'error': 'Invalid record type'}), 400
+        return jsonify({'error': 'Missing or invalid required fields'}), 400
     
     success, msg = add_dns_record(zone, name, rtype, value)
     return jsonify({'status': 'ok', 'message': msg, 'pending': True})
@@ -950,13 +1060,18 @@ def api_add_dns_record(zone):
 @login_required
 def api_edit_dns_record(zone):
     """Edit a DNS record (staged)"""
-    data = request.json
-    name = data.get('name', '').strip()
-    rtype = data.get('type', '').strip().upper()
-    value = data.get('value', '').strip()
+    # Sanitize URL parameter
+    zone = sanitize_hostname(zone)
+    if not zone:
+        return jsonify({'error': 'Invalid zone name'}), 400
+    
+    data = request.json or {}
+    name = sanitize_hostname(data.get('name'))
+    rtype = sanitize_dns_record_type(data.get('type'))
+    value = sanitize_string(data.get('value'), max_length=255)
     
     if not name or not rtype or not value:
-        return jsonify({'error': 'Missing required fields'}), 400
+        return jsonify({'error': 'Missing or invalid required fields'}), 400
     
     success, msg = edit_dns_record(zone, name, rtype, value)
     return jsonify({'status': 'ok', 'message': msg, 'pending': True})
@@ -965,7 +1080,15 @@ def api_edit_dns_record(zone):
 @login_required
 def api_delete_dns_record(zone, name, rtype):
     """Delete a DNS record (staged)"""
-    success, msg = delete_dns_record(zone, name, rtype.upper())
+    # Sanitize URL parameters
+    zone = sanitize_hostname(zone)
+    name = sanitize_hostname(name)
+    rtype = sanitize_dns_record_type(rtype)
+    
+    if not zone or not name or not rtype:
+        return jsonify({'error': 'Invalid parameters'}), 400
+    
+    success, msg = delete_dns_record(zone, name, rtype)
     return jsonify({'status': 'ok', 'message': msg, 'pending': True})
 
 @app.route('/api/leases')
@@ -1097,12 +1220,13 @@ def api_preview_changes():
 @app.route('/api/ping/<ip>')
 @login_required
 def api_ping(ip):
-    try:
-        ipaddress.ip_address(ip)
-        online = ping_host(ip)
-        return jsonify({'ip': ip, 'online': online})
-    except ValueError:
-        return jsonify({'error': 'Invalid IP'}), 400
+    # Sanitize IP
+    ip = sanitize_ip(ip)
+    if not ip:
+        return jsonify({'error': 'Invalid IP address'}), 400
+    
+    online = ping_host(ip)
+    return jsonify({'ip': ip, 'online': online})
 
 @app.route('/api/config')
 @login_required
@@ -1120,25 +1244,25 @@ def api_config():
 @app.route('/api/config', methods=['POST'])
 @login_required
 def api_update_config():
-    data = request.json
+    data = request.json or {}
     
     if 'scan_interval' in data:
-        CONFIG['scan_interval'] = max(60, int(data['scan_interval']))  # Minimum 1 minute
+        CONFIG['scan_interval'] = sanitize_int(data['scan_interval'], min_val=60, max_val=86400, default=7200)
     if 'ping_timeout' in data:
-        CONFIG['ping_timeout'] = max(1, min(10, int(data['ping_timeout'])))  # 1-10 seconds
+        CONFIG['ping_timeout'] = sanitize_int(data['ping_timeout'], min_val=1, max_val=10, default=1)
     if 'network' in data:
-        network = data['network']
+        network = sanitize_cidr(data['network'])
+        if not network:
+            return jsonify({'error': 'Invalid network format'}), 400
         # Only allow predefined networks for security
+        if not ALLOWED_NETWORKS:
+            return jsonify({'error': 'No networks configured. Set ALLOWED_NETWORKS environment variable.'}), 400
         if network in ALLOWED_NETWORKS:
-            try:
-                ipaddress.ip_network(network, strict=False)
-                CONFIG['network'] = network
-            except ValueError:
-                pass
+            CONFIG['network'] = network
         else:
             return jsonify({'error': 'Network not in allowed list', 'allowed': ALLOWED_NETWORKS}), 400
     if 'max_threads' in data:
-        CONFIG['max_threads'] = max(10, min(500, int(data['max_threads'])))
+        CONFIG['max_threads'] = sanitize_int(data['max_threads'], min_val=10, max_val=500, default=100)
     
     return jsonify({'status': 'updated', 'config': CONFIG})
 

@@ -2150,7 +2150,7 @@
             // Populate network dropdown with allowed networks
             const networkSelect = document.getElementById('setting-network');
             networkSelect.innerHTML = '';
-            if (config.allowed_networks) {
+            if (config.allowed_networks && config.allowed_networks.length > 0) {
                 config.allowed_networks.forEach(net => {
                     const option = document.createElement('option');
                     option.value = net;
@@ -2158,6 +2158,13 @@
                     if (net === config.network) option.selected = true;
                     networkSelect.appendChild(option);
                 });
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = '⚠️ No networks configured';
+                option.disabled = true;
+                option.selected = true;
+                networkSelect.appendChild(option);
             }
         }
         
