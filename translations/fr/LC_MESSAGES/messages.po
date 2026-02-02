@@ -1,0 +1,338 @@
+# French translations for IntNetAdmin
+msgid ""
+msgstr ""
+"Language: fr\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Manage your internal network with ease"
+msgstr "Gérez votre réseau interne facilement"
+
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+msgid "DHCP"
+msgstr "DHCP"
+
+msgid "DNS"
+msgstr "DNS"
+
+msgid "IP Scanner"
+msgstr "Scanner IP"
+
+msgid "Leases"
+msgstr "Baux"
+
+msgid "Networks"
+msgstr "Réseaux"
+
+msgid "Settings"
+msgstr "Paramètres"
+
+msgid "Logout"
+msgstr "Déconnexion"
+
+msgid "Static Hosts"
+msgstr "Hôtes statiques"
+
+msgid "Dynamic Hosts"
+msgstr "Hôtes dynamiques"
+
+msgid "DNS Zones"
+msgstr "Zones DNS"
+
+msgid "Online Hosts"
+msgstr "Hôtes en ligne"
+
+msgid "Active Leases"
+msgstr "Baux actifs"
+
+msgid "Services"
+msgstr "Services"
+
+msgid "Recent Static Hosts"
+msgstr "Hôtes statiques récents"
+
+msgid "Hostname"
+msgstr "Nom d'hôte"
+
+msgid "MAC Address"
+msgstr "Adresse MAC"
+
+msgid "IP Address"
+msgstr "Adresse IP"
+
+msgid "Status"
+msgstr "Statut"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "DHCP Static Mappings"
+msgstr "Mappages statiques DHCP"
+
+msgid "DHCP Global Options"
+msgstr "Options globales DHCP"
+
+msgid "DHCP Leases"
+msgstr "Baux DHCP"
+
+msgid "Search..."
+msgstr "Rechercher..."
+
+msgid "Name"
+msgstr "Nom"
+
+msgid "Value"
+msgstr "Valeur"
+
+msgid "Start Scan"
+msgstr "Démarrer le scan"
+
+msgid "Online"
+msgstr "En ligne"
+
+msgid "Offline"
+msgstr "Hors ligne"
+
+msgid "Total"
+msgstr "Total"
+
+msgid "Last scan"
+msgstr "Dernier scan"
+
+msgid "Next scan"
+msgstr "Prochain scan"
+
+msgid "Refresh"
+msgstr "Actualiser"
+
+msgid "Expires"
+msgstr "Expire"
+
+msgid "State"
+msgstr "État"
+
+msgid "All"
+msgstr "Tous"
+
+msgid "Active"
+msgstr "Actif"
+
+msgid "Network Configuration"
+msgstr "Configuration réseau"
+
+msgid "Network"
+msgstr "Réseau"
+
+msgid "Netmask"
+msgstr "Masque"
+
+msgid "DHCP Range"
+msgstr "Plage DHCP"
+
+msgid "Gateway"
+msgstr "Passerelle"
+
+msgid "Sudo Access"
+msgstr "Accès sudo"
+
+msgid "Enter your sudo password to enable write operations. Password is stored in session memory only."
+msgstr "Entrez votre mot de passe sudo pour activer les opérations d'écriture."
+
+msgid "Sudo Password"
+msgstr "Mot de passe sudo"
+
+msgid "Authorize"
+msgstr "Autoriser"
+
+msgid "Revoke"
+msgstr "Révoquer"
+
+msgid "Scanner Settings"
+msgstr "Paramètres du scanner"
+
+msgid "Scan Interval"
+msgstr "Intervalle de scan"
+
+msgid "How often to scan the network (seconds)"
+msgstr "Fréquence de scan du réseau (secondes)"
+
+msgid "Ping Timeout"
+msgstr "Timeout ping"
+
+msgid "Timeout for ping requests (seconds)"
+msgstr "Timeout pour les requêtes ping (secondes)"
+
+msgid "Network Range"
+msgstr "Plage réseau"
+
+msgid "CIDR notation (e.g., 192.168.1.0/24)"
+msgstr "Notation CIDR (ex: 192.168.1.0/24)"
+
+msgid "Max Threads"
+msgstr "Threads max"
+
+msgid "Concurrent ping threads"
+msgstr "Threads ping simultanés"
+
+msgid "Save Settings"
+msgstr "Enregistrer"
+
+msgid "Appearance"
+msgstr "Apparence"
+
+msgid "Dark Mode"
+msgstr "Mode sombre"
+
+msgid "Toggle dark/light theme"
+msgstr "Basculer thème sombre/clair"
+
+msgid "About"
+msgstr "À propos"
+
+msgid "Add Host"
+msgstr "Ajouter hôte"
+
+msgid "Add Zone"
+msgstr "Ajouter zone"
+
+msgid "Add Network"
+msgstr "Ajouter réseau"
+
+msgid "Add DHCP Static Host"
+msgstr "Ajouter hôte statique DHCP"
+
+msgid "Add DNS Zone"
+msgstr "Ajouter zone DNS"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Alphanumeric, hyphens allowed"
+msgstr "Alphanumérique, tirets autorisés"
+
+msgid "Format: XX:XX:XX:XX:XX:XX"
+msgstr "Format: XX:XX:XX:XX:XX:XX"
+
+msgid "Zone Name"
+msgstr "Nom de zone"
+
+msgid "Primary Nameserver"
+msgstr "Serveur de noms principal"
+
+msgid "Admin Email"
+msgstr "Email admin"
+
+msgid "Default TTL (seconds)"
+msgstr "TTL par défaut (secondes)"
+
+msgid "DHCP Range Start"
+msgstr "Début plage DHCP"
+
+msgid "DHCP Range End"
+msgstr "Fin plage DHCP"
+
+msgid "Sudo Password Required"
+msgstr "Mot de passe sudo requis"
+
+msgid "This action requires sudo privileges."
+msgstr "Cette action nécessite les privilèges sudo."
+
+msgid "Running"
+msgstr "En cours"
+
+msgid "Stopped"
+msgstr "Arrêté"
+
+msgid "Restart"
+msgstr "Redémarrer"
+
+msgid "Scanning..."
+msgstr "Scan en cours..."
+
+msgid "Never"
+msgstr "Jamais"
+
+msgid "Network Status History"
+msgstr "Historique réseau"
+
+msgid "Host Distribution"
+msgstr "Distribution des hôtes"
+
+msgid "Static"
+msgstr "Statique"
+
+msgid "Dynamic"
+msgstr "Dynamique"
+
+msgid "Success"
+msgstr "Succès"
+
+msgid "Error"
+msgstr "Erreur"
+
+msgid "Host added successfully"
+msgstr "Hôte ajouté"
+
+msgid "Zone created successfully"
+msgstr "Zone créée"
+
+msgid "Settings saved"
+msgstr "Paramètres enregistrés"
+
+msgid "Sudo access granted"
+msgstr "Accès sudo accordé"
+
+msgid "Sudo access revoked"
+msgstr "Accès sudo révoqué"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Save"
+msgstr "Enregistrer"
+
+msgid "Discard"
+msgstr "Annuler"
+
+msgid "Apply"
+msgstr "Appliquer"
+
+msgid "Activate Changes"
+msgstr "Activer les changements"
+
+msgid "The following changes will be written to disk."
+msgstr "Les changements suivants seront écrits sur le disque."
+
+msgid "Edit DHCP Host"
+msgstr "Modifier l'hôte DHCP"
+
+msgid "Edit DNS Record"
+msgstr "Modifier l'enregistrement DNS"
+
+msgid "Changes applied successfully"
+msgstr "Changements appliqués"
+
+msgid "Changes discarded"
+msgstr "Changements annulés"
+
+msgid "Change staged for activation"
+msgstr "Changement préparé pour l'activation"
+
+msgid "Are you sure you want to delete this?"
+msgstr "Êtes-vous sûr de vouloir supprimer ceci?"
+
+msgid "Invalid credentials"
+msgstr "Identifiants invalides"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "Select language"
+msgstr "Sélectionner la langue"

@@ -1175,6 +1175,33 @@ def api_set_lang():
         return jsonify({'status': 'ok', 'lang': lang})
     return jsonify({'error': 'Invalid language'}), 400
 
+@app.route('/api/translations/<lang>')
+def api_get_translations(lang):
+    """Get translations for a language (gettext .po file as JSON)"""
+    if lang not in ['en', 'sv', 'de', 'fr', 'es', 'it', 'nl', 'pt', 'no', 'da']:
+        return jsonify({'error': 'Invalid language'}), 400
+    
+    if lang == 'en':
+        return jsonify({})  # English is the default, no translations needed
+    
+    po_path = os.path.join(os.path.dirname(__file__), 'translations', lang, 'LC_MESSAGES', 'messages.po')
+    
+    try:
+        translations = {}
+        with open(po_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Simple .po parser
+        import re
+        entries = re.findall(r'msgid "([^"]+)"\nmsgstr "([^"]+)"', content)
+        for msgid, msgstr in entries:
+            if msgid and msgstr:
+                translations[msgid] = msgstr
+        
+        return jsonify(translations)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/stats')
 @login_required
 def api_stats():

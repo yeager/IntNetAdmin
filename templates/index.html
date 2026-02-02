@@ -625,17 +625,24 @@
                 <div><span class="label" data-i18n="last_scan">Last scan:</span> <span class="value" id="header-last-scan">-</span></div>
                 <div><span class="label" data-i18n="next_scan">Next scan:</span> <span class="value" id="header-next-scan">-</span></div>
             </div>
-            <div class="lang-switch" style="display: flex; flex-wrap: wrap; gap: 0.125rem;">
-                <button class="lang-btn active" data-lang="en" title="English">🇬🇧</button>
-                <button class="lang-btn" data-lang="sv" title="Svenska">🇸🇪</button>
-                <button class="lang-btn" data-lang="de" title="Deutsch">🇩🇪</button>
-                <button class="lang-btn" data-lang="fr" title="Français">🇫🇷</button>
-                <button class="lang-btn" data-lang="es" title="Español">🇪🇸</button>
-                <button class="lang-btn" data-lang="it" title="Italiano">🇮🇹</button>
-                <button class="lang-btn" data-lang="nl" title="Nederlands">🇳🇱</button>
-                <button class="lang-btn" data-lang="pt" title="Português">🇵🇹</button>
-                <button class="lang-btn" data-lang="no" title="Norsk">🇳🇴</button>
-                <button class="lang-btn" data-lang="da" title="Dansk">🇩🇰</button>
+            <div class="lang-dropdown" style="position: relative;">
+                <button class="lang-dropdown-btn" id="lang-dropdown-btn" style="background: var(--border); border: none; padding: 0.5rem 0.75rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+                    <span id="current-lang-flag">🇬🇧</span>
+                    <span id="current-lang-name">English</span>
+                    <span style="font-size: 0.7rem;">▼</span>
+                </button>
+                <div class="lang-dropdown-menu" id="lang-dropdown-menu" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 0.25rem; background: var(--card); border: 1px solid var(--border); border-radius: 8px; min-width: 180px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 200; overflow: hidden;">
+                    <div class="lang-option" data-lang="en" data-flag="🇬🇧" data-name="English" style="padding: 0.625rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: background 0.15s;">🇬🇧 English</div>
+                    <div class="lang-option" data-lang="sv" data-flag="🇸🇪" data-name="Svenska" style="padding: 0.625rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: background 0.15s;">🇸🇪 Svenska</div>
+                    <div class="lang-option" data-lang="de" data-flag="🇩🇪" data-name="Deutsch" style="padding: 0.625rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: background 0.15s;">🇩🇪 Deutsch</div>
+                    <div class="lang-option" data-lang="fr" data-flag="🇫🇷" data-name="Français" style="padding: 0.625rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: background 0.15s;">🇫🇷 Français</div>
+                    <div class="lang-option" data-lang="es" data-flag="🇪🇸" data-name="Español" style="padding: 0.625rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: background 0.15s;">🇪🇸 Español</div>
+                    <div class="lang-option" data-lang="it" data-flag="🇮🇹" data-name="Italiano" style="padding: 0.625rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: background 0.15s;">🇮🇹 Italiano</div>
+                    <div class="lang-option" data-lang="nl" data-flag="🇳🇱" data-name="Nederlands" style="padding: 0.625rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: background 0.15s;">🇳🇱 Nederlands</div>
+                    <div class="lang-option" data-lang="pt" data-flag="🇵🇹" data-name="Português" style="padding: 0.625rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: background 0.15s;">🇵🇹 Português</div>
+                    <div class="lang-option" data-lang="no" data-flag="🇳🇴" data-name="Norsk" style="padding: 0.625rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: background 0.15s;">🇳🇴 Norsk</div>
+                    <div class="lang-option" data-lang="da" data-flag="🇩🇰" data-name="Dansk" style="padding: 0.625rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: background 0.15s;">🇩🇰 Dansk</div>
+                </div>
             </div>
             <button class="theme-toggle" id="theme-toggle" title="Toggle theme">🌙</button>
             <div class="user-menu">
@@ -1850,23 +1857,58 @@
         });
         
         // ========================================================================
-        // Language
+        // Language Dropdown
         // ========================================================================
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentLang = btn.dataset.lang;
-                localStorage.setItem('lang', currentLang);
+        const langDropdownBtn = document.getElementById('lang-dropdown-btn');
+        const langDropdownMenu = document.getElementById('lang-dropdown-menu');
+        
+        langDropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            langDropdownMenu.style.display = langDropdownMenu.style.display === 'none' ? 'block' : 'none';
+        });
+        
+        document.addEventListener('click', () => {
+            langDropdownMenu.style.display = 'none';
+        });
+        
+        document.querySelectorAll('.lang-option').forEach(option => {
+            option.addEventListener('mouseenter', () => {
+                option.style.background = 'var(--primary)';
+            });
+            option.addEventListener('mouseleave', () => {
+                option.style.background = 'transparent';
+            });
+            option.addEventListener('click', async () => {
+                const lang = option.dataset.lang;
+                const flag = option.dataset.flag;
+                const name = option.dataset.name;
+                
+                document.getElementById('current-lang-flag').textContent = flag;
+                document.getElementById('current-lang-name').textContent = name;
+                
+                currentLang = lang;
+                localStorage.setItem('lang', lang);
+                langDropdownMenu.style.display = 'none';
+                
                 await fetch('/api/lang', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ lang: currentLang })
+                    body: JSON.stringify({ lang })
                 });
+                
                 applyTranslations();
                 updateCharts();
             });
         });
+        
+        // Set initial language in dropdown
+        function updateLangDropdown() {
+            const option = document.querySelector(`.lang-option[data-lang="${currentLang}"]`);
+            if (option) {
+                document.getElementById('current-lang-flag').textContent = option.dataset.flag;
+                document.getElementById('current-lang-name').textContent = option.dataset.name;
+            }
+        }
         
         // ========================================================================
         // Navigation
@@ -2697,9 +2739,8 @@
         // Initialize
         // ========================================================================
         async function init() {
-            // Set initial language button
-            document.querySelector(`.lang-btn[data-lang="${currentLang}"]`)?.classList.add('active');
-            document.querySelector(`.lang-btn:not([data-lang="${currentLang}"])`)?.classList.remove('active');
+            // Set initial language in dropdown
+            updateLangDropdown();
             
             applyTheme();
             applyTranslations();

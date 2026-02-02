@@ -1,0 +1,338 @@
+# Norwegian translations for IntNetAdmin
+msgid ""
+msgstr ""
+"Language: no\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Manage your internal network with ease"
+msgstr "Administrer ditt interne nettverk enkelt"
+
+msgid "Dashboard"
+msgstr "Oversikt"
+
+msgid "DHCP"
+msgstr "DHCP"
+
+msgid "DNS"
+msgstr "DNS"
+
+msgid "IP Scanner"
+msgstr "IP-skanner"
+
+msgid "Leases"
+msgstr "Leie"
+
+msgid "Networks"
+msgstr "Nettverk"
+
+msgid "Settings"
+msgstr "Innstillinger"
+
+msgid "Logout"
+msgstr "Logg ut"
+
+msgid "Static Hosts"
+msgstr "Statiske verter"
+
+msgid "Dynamic Hosts"
+msgstr "Dynamiske verter"
+
+msgid "DNS Zones"
+msgstr "DNS-soner"
+
+msgid "Online Hosts"
+msgstr "Online verter"
+
+msgid "Active Leases"
+msgstr "Aktive leie"
+
+msgid "Services"
+msgstr "Tjenester"
+
+msgid "Recent Static Hosts"
+msgstr "Nylige statiske verter"
+
+msgid "Hostname"
+msgstr "Vertsnavn"
+
+msgid "MAC Address"
+msgstr "MAC-adresse"
+
+msgid "IP Address"
+msgstr "IP-adresse"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Actions"
+msgstr "Handlinger"
+
+msgid "DHCP Static Mappings"
+msgstr "DHCP statiske tilordninger"
+
+msgid "DHCP Global Options"
+msgstr "DHCP globale alternativer"
+
+msgid "DHCP Leases"
+msgstr "DHCP-leie"
+
+msgid "Search..."
+msgstr "Søk..."
+
+msgid "Name"
+msgstr "Navn"
+
+msgid "Value"
+msgstr "Verdi"
+
+msgid "Start Scan"
+msgstr "Start skanning"
+
+msgid "Online"
+msgstr "Online"
+
+msgid "Offline"
+msgstr "Offline"
+
+msgid "Total"
+msgstr "Totalt"
+
+msgid "Last scan"
+msgstr "Siste skanning"
+
+msgid "Next scan"
+msgstr "Neste skanning"
+
+msgid "Refresh"
+msgstr "Oppdater"
+
+msgid "Expires"
+msgstr "Utløper"
+
+msgid "State"
+msgstr "Tilstand"
+
+msgid "All"
+msgstr "Alle"
+
+msgid "Active"
+msgstr "Aktiv"
+
+msgid "Network Configuration"
+msgstr "Nettverkskonfigurasjon"
+
+msgid "Network"
+msgstr "Nettverk"
+
+msgid "Netmask"
+msgstr "Nettmaske"
+
+msgid "DHCP Range"
+msgstr "DHCP-område"
+
+msgid "Gateway"
+msgstr "Gateway"
+
+msgid "Sudo Access"
+msgstr "Sudo-tilgang"
+
+msgid "Enter your sudo password to enable write operations. Password is stored in session memory only."
+msgstr "Skriv inn sudo-passordet ditt for å aktivere skriveoperasjoner."
+
+msgid "Sudo Password"
+msgstr "Sudo-passord"
+
+msgid "Authorize"
+msgstr "Autoriser"
+
+msgid "Revoke"
+msgstr "Tilbakekall"
+
+msgid "Scanner Settings"
+msgstr "Skannerinnstillinger"
+
+msgid "Scan Interval"
+msgstr "Skanningsintervall"
+
+msgid "How often to scan the network (seconds)"
+msgstr "Hvor ofte nettverket skannes (sekunder)"
+
+msgid "Ping Timeout"
+msgstr "Ping-tidsavbrudd"
+
+msgid "Timeout for ping requests (seconds)"
+msgstr "Tidsavbrudd for ping-forespørsler (sekunder)"
+
+msgid "Network Range"
+msgstr "Nettverksområde"
+
+msgid "CIDR notation (e.g., 192.168.1.0/24)"
+msgstr "CIDR-notasjon (f.eks. 192.168.1.0/24)"
+
+msgid "Max Threads"
+msgstr "Maks tråder"
+
+msgid "Concurrent ping threads"
+msgstr "Samtidige ping-tråder"
+
+msgid "Save Settings"
+msgstr "Lagre innstillinger"
+
+msgid "Appearance"
+msgstr "Utseende"
+
+msgid "Dark Mode"
+msgstr "Mørk modus"
+
+msgid "Toggle dark/light theme"
+msgstr "Bytt mellom mørkt/lyst tema"
+
+msgid "About"
+msgstr "Om"
+
+msgid "Add Host"
+msgstr "Legg til vert"
+
+msgid "Add Zone"
+msgstr "Legg til sone"
+
+msgid "Add Network"
+msgstr "Legg til nettverk"
+
+msgid "Add DHCP Static Host"
+msgstr "Legg til DHCP statisk vert"
+
+msgid "Add DNS Zone"
+msgstr "Legg til DNS-sone"
+
+msgid "Cancel"
+msgstr "Avbryt"
+
+msgid "Alphanumeric, hyphens allowed"
+msgstr "Alfanumerisk, bindestreker tillatt"
+
+msgid "Format: XX:XX:XX:XX:XX:XX"
+msgstr "Format: XX:XX:XX:XX:XX:XX"
+
+msgid "Zone Name"
+msgstr "Sonenavn"
+
+msgid "Primary Nameserver"
+msgstr "Primær navneserver"
+
+msgid "Admin Email"
+msgstr "Admin e-post"
+
+msgid "Default TTL (seconds)"
+msgstr "Standard TTL (sekunder)"
+
+msgid "DHCP Range Start"
+msgstr "DHCP-område start"
+
+msgid "DHCP Range End"
+msgstr "DHCP-område slutt"
+
+msgid "Sudo Password Required"
+msgstr "Sudo-passord påkrevd"
+
+msgid "This action requires sudo privileges."
+msgstr "Denne handlingen krever sudo-rettigheter."
+
+msgid "Running"
+msgstr "Kjører"
+
+msgid "Stopped"
+msgstr "Stoppet"
+
+msgid "Restart"
+msgstr "Start på nytt"
+
+msgid "Scanning..."
+msgstr "Skanner..."
+
+msgid "Never"
+msgstr "Aldri"
+
+msgid "Network Status History"
+msgstr "Nettverkshistorikk"
+
+msgid "Host Distribution"
+msgstr "Vertfordeling"
+
+msgid "Static"
+msgstr "Statisk"
+
+msgid "Dynamic"
+msgstr "Dynamisk"
+
+msgid "Success"
+msgstr "Suksess"
+
+msgid "Error"
+msgstr "Feil"
+
+msgid "Host added successfully"
+msgstr "Vert lagt til"
+
+msgid "Zone created successfully"
+msgstr "Sone opprettet"
+
+msgid "Settings saved"
+msgstr "Innstillinger lagret"
+
+msgid "Sudo access granted"
+msgstr "Sudo-tilgang gitt"
+
+msgid "Sudo access revoked"
+msgstr "Sudo-tilgang tilbakekalt"
+
+msgid "Edit"
+msgstr "Rediger"
+
+msgid "Delete"
+msgstr "Slett"
+
+msgid "Save"
+msgstr "Lagre"
+
+msgid "Discard"
+msgstr "Forkast"
+
+msgid "Apply"
+msgstr "Bruk"
+
+msgid "Activate Changes"
+msgstr "Aktiver endringer"
+
+msgid "The following changes will be written to disk."
+msgstr "Følgende endringer vil bli skrevet til disk."
+
+msgid "Edit DHCP Host"
+msgstr "Rediger DHCP-vert"
+
+msgid "Edit DNS Record"
+msgstr "Rediger DNS-oppføring"
+
+msgid "Changes applied successfully"
+msgstr "Endringer brukt"
+
+msgid "Changes discarded"
+msgstr "Endringer forkastet"
+
+msgid "Change staged for activation"
+msgstr "Endring forberedt for aktivering"
+
+msgid "Are you sure you want to delete this?"
+msgstr "Er du sikker på at du vil slette dette?"
+
+msgid "Invalid credentials"
+msgstr "Ugyldige legitimasjon"
+
+msgid "Language"
+msgstr "Språk"
+
+msgid "Select language"
+msgstr "Velg språk"

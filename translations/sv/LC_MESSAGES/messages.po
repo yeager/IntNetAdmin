@@ -1,0 +1,338 @@
+# Swedish translations for IntNetAdmin
+msgid ""
+msgstr ""
+"Language: sv\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Manage your internal network with ease"
+msgstr "Hantera ditt interna nätverk enkelt"
+
+msgid "Dashboard"
+msgstr "Översikt"
+
+msgid "DHCP"
+msgstr "DHCP"
+
+msgid "DNS"
+msgstr "DNS"
+
+msgid "IP Scanner"
+msgstr "IP-skanner"
+
+msgid "Leases"
+msgstr "Lån"
+
+msgid "Networks"
+msgstr "Nätverk"
+
+msgid "Settings"
+msgstr "Inställningar"
+
+msgid "Logout"
+msgstr "Logga ut"
+
+msgid "Static Hosts"
+msgstr "Statiska värdar"
+
+msgid "Dynamic Hosts"
+msgstr "Dynamiska värdar"
+
+msgid "DNS Zones"
+msgstr "DNS-zoner"
+
+msgid "Online Hosts"
+msgstr "Online-värdar"
+
+msgid "Active Leases"
+msgstr "Aktiva lån"
+
+msgid "Services"
+msgstr "Tjänster"
+
+msgid "Recent Static Hosts"
+msgstr "Senaste statiska värdar"
+
+msgid "Hostname"
+msgstr "Värdnamn"
+
+msgid "MAC Address"
+msgstr "MAC-adress"
+
+msgid "IP Address"
+msgstr "IP-adress"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "Actions"
+msgstr "Åtgärder"
+
+msgid "DHCP Static Mappings"
+msgstr "DHCP statiska mappningar"
+
+msgid "DHCP Global Options"
+msgstr "DHCP globala alternativ"
+
+msgid "DHCP Leases"
+msgstr "DHCP-lån"
+
+msgid "Search..."
+msgstr "Sök..."
+
+msgid "Name"
+msgstr "Namn"
+
+msgid "Value"
+msgstr "Värde"
+
+msgid "Start Scan"
+msgstr "Starta skanning"
+
+msgid "Online"
+msgstr "Online"
+
+msgid "Offline"
+msgstr "Offline"
+
+msgid "Total"
+msgstr "Totalt"
+
+msgid "Last scan"
+msgstr "Senaste skanning"
+
+msgid "Next scan"
+msgstr "Nästa skanning"
+
+msgid "Refresh"
+msgstr "Uppdatera"
+
+msgid "Expires"
+msgstr "Utgår"
+
+msgid "State"
+msgstr "Status"
+
+msgid "All"
+msgstr "Alla"
+
+msgid "Active"
+msgstr "Aktiv"
+
+msgid "Network Configuration"
+msgstr "Nätverkskonfiguration"
+
+msgid "Network"
+msgstr "Nätverk"
+
+msgid "Netmask"
+msgstr "Nätmask"
+
+msgid "DHCP Range"
+msgstr "DHCP-intervall"
+
+msgid "Gateway"
+msgstr "Gateway"
+
+msgid "Sudo Access"
+msgstr "Sudo-åtkomst"
+
+msgid "Enter your sudo password to enable write operations. Password is stored in session memory only."
+msgstr "Ange ditt sudo-lösenord för att aktivera skrivoperationer. Lösenord lagras endast i sessionsminnet."
+
+msgid "Sudo Password"
+msgstr "Sudo-lösenord"
+
+msgid "Authorize"
+msgstr "Auktorisera"
+
+msgid "Revoke"
+msgstr "Återkalla"
+
+msgid "Scanner Settings"
+msgstr "Skannerinställningar"
+
+msgid "Scan Interval"
+msgstr "Skanningsintervall"
+
+msgid "How often to scan the network (seconds)"
+msgstr "Hur ofta nätverket skannas (sekunder)"
+
+msgid "Ping Timeout"
+msgstr "Ping-timeout"
+
+msgid "Timeout for ping requests (seconds)"
+msgstr "Timeout för ping-förfrågningar (sekunder)"
+
+msgid "Network Range"
+msgstr "Nätverksomfång"
+
+msgid "CIDR notation (e.g., 192.168.1.0/24)"
+msgstr "CIDR-notation (t.ex. 192.168.1.0/24)"
+
+msgid "Max Threads"
+msgstr "Max trådar"
+
+msgid "Concurrent ping threads"
+msgstr "Samtidiga ping-trådar"
+
+msgid "Save Settings"
+msgstr "Spara inställningar"
+
+msgid "Appearance"
+msgstr "Utseende"
+
+msgid "Dark Mode"
+msgstr "Mörkt läge"
+
+msgid "Toggle dark/light theme"
+msgstr "Växla mellan mörkt/ljust tema"
+
+msgid "About"
+msgstr "Om"
+
+msgid "Add Host"
+msgstr "Lägg till värd"
+
+msgid "Add Zone"
+msgstr "Lägg till zon"
+
+msgid "Add Network"
+msgstr "Lägg till nätverk"
+
+msgid "Add DHCP Static Host"
+msgstr "Lägg till DHCP statisk värd"
+
+msgid "Add DNS Zone"
+msgstr "Lägg till DNS-zon"
+
+msgid "Cancel"
+msgstr "Avbryt"
+
+msgid "Alphanumeric, hyphens allowed"
+msgstr "Alfanumeriskt, bindestreck tillåtet"
+
+msgid "Format: XX:XX:XX:XX:XX:XX"
+msgstr "Format: XX:XX:XX:XX:XX:XX"
+
+msgid "Zone Name"
+msgstr "Zonnamn"
+
+msgid "Primary Nameserver"
+msgstr "Primär namnserver"
+
+msgid "Admin Email"
+msgstr "Admin e-post"
+
+msgid "Default TTL (seconds)"
+msgstr "Standard TTL (sekunder)"
+
+msgid "DHCP Range Start"
+msgstr "DHCP-intervall start"
+
+msgid "DHCP Range End"
+msgstr "DHCP-intervall slut"
+
+msgid "Sudo Password Required"
+msgstr "Sudo-lösenord krävs"
+
+msgid "This action requires sudo privileges."
+msgstr "Denna åtgärd kräver sudo-behörighet."
+
+msgid "Running"
+msgstr "Körs"
+
+msgid "Stopped"
+msgstr "Stoppad"
+
+msgid "Restart"
+msgstr "Starta om"
+
+msgid "Scanning..."
+msgstr "Skannar..."
+
+msgid "Never"
+msgstr "Aldrig"
+
+msgid "Network Status History"
+msgstr "Nätverksstatushistorik"
+
+msgid "Host Distribution"
+msgstr "Värdfördelning"
+
+msgid "Static"
+msgstr "Statisk"
+
+msgid "Dynamic"
+msgstr "Dynamisk"
+
+msgid "Success"
+msgstr "Klart"
+
+msgid "Error"
+msgstr "Fel"
+
+msgid "Host added successfully"
+msgstr "Värd tillagd"
+
+msgid "Zone created successfully"
+msgstr "Zon skapad"
+
+msgid "Settings saved"
+msgstr "Inställningar sparade"
+
+msgid "Sudo access granted"
+msgstr "Sudo-åtkomst beviljad"
+
+msgid "Sudo access revoked"
+msgstr "Sudo-åtkomst återkallad"
+
+msgid "Edit"
+msgstr "Redigera"
+
+msgid "Delete"
+msgstr "Ta bort"
+
+msgid "Save"
+msgstr "Spara"
+
+msgid "Discard"
+msgstr "Kasta"
+
+msgid "Apply"
+msgstr "Verkställ"
+
+msgid "Activate Changes"
+msgstr "Aktivera ändringar"
+
+msgid "The following changes will be written to disk."
+msgstr "Följande ändringar kommer skrivas till disk."
+
+msgid "Edit DHCP Host"
+msgstr "Redigera DHCP-värd"
+
+msgid "Edit DNS Record"
+msgstr "Redigera DNS-post"
+
+msgid "Changes applied successfully"
+msgstr "Ändringar verkställda"
+
+msgid "Changes discarded"
+msgstr "Ändringar kastade"
+
+msgid "Change staged for activation"
+msgstr "Ändring förberedd för aktivering"
+
+msgid "Are you sure you want to delete this?"
+msgstr "Är du säker på att du vill ta bort detta?"
+
+msgid "Invalid credentials"
+msgstr "Ogiltiga inloggningsuppgifter"
+
+msgid "Language"
+msgstr "Språk"
+
+msgid "Select language"
+msgstr "Välj språk"

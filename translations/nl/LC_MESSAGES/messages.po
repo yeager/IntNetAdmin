@@ -1,0 +1,338 @@
+# Dutch translations for IntNetAdmin
+msgid ""
+msgstr ""
+"Language: nl\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Manage your internal network with ease"
+msgstr "Beheer uw interne netwerk met gemak"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "DHCP"
+msgstr "DHCP"
+
+msgid "DNS"
+msgstr "DNS"
+
+msgid "IP Scanner"
+msgstr "IP Scanner"
+
+msgid "Leases"
+msgstr "Leases"
+
+msgid "Networks"
+msgstr "Netwerken"
+
+msgid "Settings"
+msgstr "Instellingen"
+
+msgid "Logout"
+msgstr "Uitloggen"
+
+msgid "Static Hosts"
+msgstr "Statische hosts"
+
+msgid "Dynamic Hosts"
+msgstr "Dynamische hosts"
+
+msgid "DNS Zones"
+msgstr "DNS Zones"
+
+msgid "Online Hosts"
+msgstr "Online hosts"
+
+msgid "Active Leases"
+msgstr "Actieve leases"
+
+msgid "Services"
+msgstr "Diensten"
+
+msgid "Recent Static Hosts"
+msgstr "Recente statische hosts"
+
+msgid "Hostname"
+msgstr "Hostnaam"
+
+msgid "MAC Address"
+msgstr "MAC-adres"
+
+msgid "IP Address"
+msgstr "IP-adres"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Actions"
+msgstr "Acties"
+
+msgid "DHCP Static Mappings"
+msgstr "DHCP Statische toewijzingen"
+
+msgid "DHCP Global Options"
+msgstr "DHCP Globale opties"
+
+msgid "DHCP Leases"
+msgstr "DHCP Leases"
+
+msgid "Search..."
+msgstr "Zoeken..."
+
+msgid "Name"
+msgstr "Naam"
+
+msgid "Value"
+msgstr "Waarde"
+
+msgid "Start Scan"
+msgstr "Start scan"
+
+msgid "Online"
+msgstr "Online"
+
+msgid "Offline"
+msgstr "Offline"
+
+msgid "Total"
+msgstr "Totaal"
+
+msgid "Last scan"
+msgstr "Laatste scan"
+
+msgid "Next scan"
+msgstr "Volgende scan"
+
+msgid "Refresh"
+msgstr "Vernieuwen"
+
+msgid "Expires"
+msgstr "Verloopt"
+
+msgid "State"
+msgstr "Status"
+
+msgid "All"
+msgstr "Alle"
+
+msgid "Active"
+msgstr "Actief"
+
+msgid "Network Configuration"
+msgstr "Netwerkconfiguratie"
+
+msgid "Network"
+msgstr "Netwerk"
+
+msgid "Netmask"
+msgstr "Netmasker"
+
+msgid "DHCP Range"
+msgstr "DHCP Bereik"
+
+msgid "Gateway"
+msgstr "Gateway"
+
+msgid "Sudo Access"
+msgstr "Sudo toegang"
+
+msgid "Enter your sudo password to enable write operations. Password is stored in session memory only."
+msgstr "Voer uw sudo wachtwoord in om schrijfbewerkingen in te schakelen."
+
+msgid "Sudo Password"
+msgstr "Sudo wachtwoord"
+
+msgid "Authorize"
+msgstr "Autoriseren"
+
+msgid "Revoke"
+msgstr "Intrekken"
+
+msgid "Scanner Settings"
+msgstr "Scanner instellingen"
+
+msgid "Scan Interval"
+msgstr "Scan interval"
+
+msgid "How often to scan the network (seconds)"
+msgstr "Hoe vaak het netwerk wordt gescand (seconden)"
+
+msgid "Ping Timeout"
+msgstr "Ping timeout"
+
+msgid "Timeout for ping requests (seconds)"
+msgstr "Timeout voor ping verzoeken (seconden)"
+
+msgid "Network Range"
+msgstr "Netwerkbereik"
+
+msgid "CIDR notation (e.g., 192.168.1.0/24)"
+msgstr "CIDR notatie (bijv. 192.168.1.0/24)"
+
+msgid "Max Threads"
+msgstr "Max threads"
+
+msgid "Concurrent ping threads"
+msgstr "Gelijktijdige ping threads"
+
+msgid "Save Settings"
+msgstr "Instellingen opslaan"
+
+msgid "Appearance"
+msgstr "Uiterlijk"
+
+msgid "Dark Mode"
+msgstr "Donkere modus"
+
+msgid "Toggle dark/light theme"
+msgstr "Schakel donker/licht thema"
+
+msgid "About"
+msgstr "Over"
+
+msgid "Add Host"
+msgstr "Host toevoegen"
+
+msgid "Add Zone"
+msgstr "Zone toevoegen"
+
+msgid "Add Network"
+msgstr "Netwerk toevoegen"
+
+msgid "Add DHCP Static Host"
+msgstr "DHCP Statische host toevoegen"
+
+msgid "Add DNS Zone"
+msgstr "DNS Zone toevoegen"
+
+msgid "Cancel"
+msgstr "Annuleren"
+
+msgid "Alphanumeric, hyphens allowed"
+msgstr "Alfanumeriek, koppeltekens toegestaan"
+
+msgid "Format: XX:XX:XX:XX:XX:XX"
+msgstr "Formaat: XX:XX:XX:XX:XX:XX"
+
+msgid "Zone Name"
+msgstr "Zone naam"
+
+msgid "Primary Nameserver"
+msgstr "Primaire nameserver"
+
+msgid "Admin Email"
+msgstr "Admin email"
+
+msgid "Default TTL (seconds)"
+msgstr "Standaard TTL (seconden)"
+
+msgid "DHCP Range Start"
+msgstr "DHCP Bereik start"
+
+msgid "DHCP Range End"
+msgstr "DHCP Bereik einde"
+
+msgid "Sudo Password Required"
+msgstr "Sudo wachtwoord vereist"
+
+msgid "This action requires sudo privileges."
+msgstr "Deze actie vereist sudo rechten."
+
+msgid "Running"
+msgstr "Actief"
+
+msgid "Stopped"
+msgstr "Gestopt"
+
+msgid "Restart"
+msgstr "Herstarten"
+
+msgid "Scanning..."
+msgstr "Scannen..."
+
+msgid "Never"
+msgstr "Nooit"
+
+msgid "Network Status History"
+msgstr "Netwerk geschiedenis"
+
+msgid "Host Distribution"
+msgstr "Host verdeling"
+
+msgid "Static"
+msgstr "Statisch"
+
+msgid "Dynamic"
+msgstr "Dynamisch"
+
+msgid "Success"
+msgstr "Succes"
+
+msgid "Error"
+msgstr "Fout"
+
+msgid "Host added successfully"
+msgstr "Host toegevoegd"
+
+msgid "Zone created successfully"
+msgstr "Zone aangemaakt"
+
+msgid "Settings saved"
+msgstr "Instellingen opgeslagen"
+
+msgid "Sudo access granted"
+msgstr "Sudo toegang verleend"
+
+msgid "Sudo access revoked"
+msgstr "Sudo toegang ingetrokken"
+
+msgid "Edit"
+msgstr "Bewerken"
+
+msgid "Delete"
+msgstr "Verwijderen"
+
+msgid "Save"
+msgstr "Opslaan"
+
+msgid "Discard"
+msgstr "Verwerpen"
+
+msgid "Apply"
+msgstr "Toepassen"
+
+msgid "Activate Changes"
+msgstr "Wijzigingen activeren"
+
+msgid "The following changes will be written to disk."
+msgstr "De volgende wijzigingen worden naar schijf geschreven."
+
+msgid "Edit DHCP Host"
+msgstr "DHCP host bewerken"
+
+msgid "Edit DNS Record"
+msgstr "DNS record bewerken"
+
+msgid "Changes applied successfully"
+msgstr "Wijzigingen toegepast"
+
+msgid "Changes discarded"
+msgstr "Wijzigingen verworpen"
+
+msgid "Change staged for activation"
+msgstr "Wijziging voorbereid voor activering"
+
+msgid "Are you sure you want to delete this?"
+msgstr "Weet u zeker dat u dit wilt verwijderen?"
+
+msgid "Invalid credentials"
+msgstr "Ongeldige inloggegevens"
+
+msgid "Language"
+msgstr "Taal"
+
+msgid "Select language"
+msgstr "Selecteer taal"
