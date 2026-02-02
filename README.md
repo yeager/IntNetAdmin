@@ -4,103 +4,155 @@
   <img src="https://raw.githubusercontent.com/yeager/IntNetAdmin/main/static/logo.svg" alt="IntNetAdmin Logo" width="120">
 </p>
 
-**Manage your internal network with ease**
+<h3 align="center">Manage your internal network with ease</h3>
 
-[![GitHub](https://img.shields.io/badge/GitHub-yeager/IntNetAdmin-181717?logo=github)](https://github.com/yeager/IntNetAdmin)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)](https://flask.palletsprojects.com/)
+<p align="center">
+  <a href="https://github.com/yeager/IntNetAdmin"><img src="https://img.shields.io/badge/GitHub-yeager/IntNetAdmin-181717?logo=github" alt="GitHub"></a>
+  <a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License: GPL v3"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python 3.8+"></a>
+  <a href="https://flask.palletsprojects.com/"><img src="https://img.shields.io/badge/Flask-2.0+-green.svg" alt="Flask"></a>
+</p>
 
-IntNetAdmin is a web-based dashboard for managing DHCP and DNS services on your internal network. It provides a modern, clean interface for viewing and configuring network services, with automatic network scanning and real-time status monitoring.
+---
 
-![Screenshot]<img width="1662" height="836" alt="image" src="https://github.com/user-attachments/assets/c9bab5c0-e734-4918-84e6-d7b4633e17e8" />
+IntNetAdmin is a web-based dashboard for managing DHCP and DNS services on your internal network. It provides a modern, dark-themed interface for configuring network services with real-time status monitoring and automatic network scanning.
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c9bab5c0-e734-4918-84e6-d7b4633e17e8" alt="IntNetAdmin Screenshot" width="100%">
+</p>
 
-## Features
+## ✨ Features
 
-### Core Functionality
-- **DHCP Management** - View and add static host reservations (MAC → IP mapping)
-- **DNS Zone Management** - Browse DNS records with status indicators, create new zones
-- **IP Scanner** - Automatic network scanning every 2 hours with manual trigger option
-- **DHCP Leases** - View active and expired DHCP leases with status
-- **Network Overview** - Subnet configuration display
+### DHCP Management
+- View, add, edit and delete static host reservations (MAC → IP mapping)
+- DHCP lease monitoring with status indicators
+- **Promote lease to static** – Convert dynamic leases to static reservations with one click
+- Automatic DNS record creation when promoting leases
+
+### DNS Management
+- Browse and search DNS zones and records
+- Add, edit and delete DNS records (A, AAAA, CNAME, MX, TXT, PTR, NS, SRV)
+- Create new forward and reverse zones
+- PTR record support for reverse DNS
+
+### Network Configuration
+- View, add, edit and delete subnet configurations
+- DHCP range management per subnet
+- Gateway and DNS server settings
+
+### IP Scanner
+- Automatic network scanning (configurable interval)
+- Manual scan trigger
+- Online/offline status for all hosts
+- Network status history charts
 
 ### Dashboard
-- Real-time statistics (static hosts, dynamic hosts, online count, DNS zones)
-- Network status history charts (powered by Chart.js)
-- Host distribution visualization
+- Real-time statistics (static hosts, dynamic hosts, online count, DNS zones, active leases)
+- Network status history visualization (Chart.js)
+- Host distribution pie chart
 - Service status monitoring (ISC DHCP, BIND)
 
 ### User Experience
 - 🌙 Dark/Light theme toggle
-- 🇬🇧/🇸🇪 i18n support (English & Swedish)
-- Green/red status indicators for online/offline hosts
-- Search and filter functionality
-- Responsive design for mobile devices
+- 🌍 **10 languages**: English, Svenska, Deutsch, Français, Español, Italiano, Nederlands, Português, Norsk, Dansk
+- 🔒 Staged changes with "Activate Changes" workflow – preview before writing to disk
+- 🔐 PAM authentication (system users)
+- 📱 Responsive design
 
-### Security
-- PAM authentication (system users)
-- Session-based sudo password (never stored on disk)
-- No external API dependencies
+## 🚀 Quick Start
 
-## Requirements
+### Requirements
 
 - Python 3.8+
-- ISC DHCP Server (isc-dhcp-server)
-- BIND DNS Server (bind9)
-- Linux system with PAM
+- ISC DHCP Server (`isc-dhcp-server`)
+- BIND DNS Server (`bind9`)
+- Linux with PAM
 
-## Installation
-
-### 1. Clone the repository
+### Installation
 
 ```bash
-git clone https://github.com/yourusername/intnetadmin.git
-cd intnetadmin
-```
+# Clone
+git clone https://github.com/yeager/IntNetAdmin.git
+cd IntNetAdmin
 
-### 2. Create virtual environment
-
-```bash
+# Virtual environment
 python3 -m venv venv
 source venv/bin/activate
-```
 
-### 3. Install dependencies
+# Dependencies
+pip install flask flask-babel python-pam gunicorn
 
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configure
-
-Edit `app.py` to match your network configuration:
-
-```python
-DEFAULT_CONFIG = {
-    'dhcp_conf': '/etc/dhcp/dhcpd.conf',
-    'bind_dir': '/etc/bind',
-    'network': '192.168.2.0/23',  # Your network CIDR
-    'scan_interval': 7200,        # 2 hours
-    'ping_timeout': 1,
-    'ping_count': 1,
-    'max_threads': 100,
-}
-```
-
-### 5. Run with Gunicorn (Production)
-
-```bash
-gunicorn -w 4 -b 0.0.0.0:5000 app:app
-```
-
-### 6. Run in Development
-
-```bash
+# Run (development)
 python app.py
+
+# Run (production)
+gunicorn -w 2 -b 0.0.0.0:5000 app:app
 ```
 
-## Systemd Service
+### Configuration
+
+Set environment variables or edit defaults in `app.py`:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DHCP_CONF` | `/etc/dhcp/dhcpd.conf` | DHCP config file |
+| `DHCP_LEASES` | `/var/lib/dhcp/dhcpd.leases` | DHCP leases file |
+| `BIND_DIR` | `/etc/bind` | BIND zone directory |
+| `NETWORK_CIDR` | `192.168.2.0/23` | Network to scan |
+| `SECRET_KEY` | (generated) | Flask session key |
+
+## 📡 API Endpoints
+
+### DHCP
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/dhcp` | Get DHCP configuration |
+| POST | `/api/dhcp/host` | Add static host |
+| PUT | `/api/dhcp/host/<hostname>` | Edit host |
+| DELETE | `/api/dhcp/host/<hostname>` | Delete host |
+
+### DNS
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/dns` | Get zones and records |
+| POST | `/api/dns/zone` | Create zone |
+| POST | `/api/dns/zone/<zone>/record` | Add record |
+| PUT | `/api/dns/zone/<zone>/record` | Edit record |
+| DELETE | `/api/dns/zone/<zone>/record/<name>/<type>` | Delete record |
+
+### Networks
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/networks` | Get subnets |
+| POST | `/api/networks` | Add subnet |
+| PUT | `/api/networks/<network>` | Edit subnet |
+| DELETE | `/api/networks/<network>` | Delete subnet |
+
+### Leases
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/leases` | Get DHCP leases |
+| POST | `/api/leases/promote` | Promote lease to static + DNS |
+
+### Other
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/stats` | Dashboard statistics |
+| GET | `/api/scan` | Scan results |
+| POST | `/api/scan/start` | Trigger scan |
+| GET | `/api/services` | Service status |
+| GET | `/api/changes` | Pending changes |
+| POST | `/api/changes/apply` | Apply changes (requires sudo) |
+| POST | `/api/changes/discard` | Discard changes |
+
+## 🔐 Security
+
+- **PAM Authentication** – Uses system users for login
+- **Sudo on demand** – Write operations require sudo password entered through UI
+- **Session-only storage** – Sudo password never written to disk
+- **Staged changes** – All modifications are staged and previewed before applying
+
+## 🐧 Systemd Service
 
 Create `/etc/systemd/system/intnetadmin.service`:
 
@@ -110,11 +162,11 @@ Description=IntNetAdmin - Network Administration Dashboard
 After=network.target
 
 [Service]
+Type=simple
 User=root
-Group=root
-WorkingDirectory=/opt/intnetadmin
-Environment="PATH=/opt/intnetadmin/venv/bin"
-ExecStart=/opt/intnetadmin/venv/bin/gunicorn -w 4 -b 127.0.0.1:5000 app:app
+WorkingDirectory=/opt/IntNetAdmin
+Environment="PATH=/opt/IntNetAdmin/venv/bin"
+ExecStart=/opt/IntNetAdmin/venv/bin/gunicorn -w 2 -b 0.0.0.0:5000 app:app
 Restart=always
 RestartSec=10
 
@@ -122,96 +174,19 @@ RestartSec=10
 WantedBy=multi-user.target
 ```
 
-Enable and start:
-
 ```bash
 sudo systemctl enable intnetadmin
 sudo systemctl start intnetadmin
 ```
 
-## Nginx Reverse Proxy
+## 🤝 Contributing
 
-```nginx
-server {
-    listen 80;
-    server_name netadmin.example.local;
+Contributions welcome! Fork, create a feature branch, and submit a PR.
 
-    location / {
-        proxy_pass http://127.0.0.1:5000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
+## 📄 License
 
-## Configuration Files
+GNU General Public License v3.0 – see [LICENSE](LICENSE)
 
-IntNetAdmin reads the following system files:
+## 👤 Author
 
-| File | Description |
-|------|-------------|
-| `/etc/dhcp/dhcpd.conf` | DHCP server configuration |
-| `/etc/bind/db.*` | BIND DNS zone files |
-| `/var/lib/dhcp/dhcpd.leases` | DHCP lease database |
-
-**Note:** Write operations (adding hosts/zones) require sudo privileges, which are requested through the UI and stored only in session memory.
-
-## API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/user` | GET | Current user info |
-| `/api/stats` | GET | Dashboard statistics |
-| `/api/dhcp` | GET | DHCP configuration |
-| `/api/dhcp/host` | POST | Add static DHCP host |
-| `/api/dns` | GET | DNS zones and records |
-| `/api/dns/zone` | POST | Create new DNS zone |
-| `/api/leases` | GET | DHCP leases |
-| `/api/networks` | GET | Network configuration |
-| `/api/scan` | GET | IP scan results |
-| `/api/scan/start` | POST | Trigger manual scan |
-| `/api/scan/history` | GET | Scan history for charts |
-| `/api/services` | GET | Service status |
-| `/api/config` | GET/POST | App configuration |
-| `/api/sudo` | POST | Set sudo password |
-
-## Screenshots
-
-### Dashboard
-The main dashboard shows network statistics, charts, and service status.
-
-### DHCP View
-View and manage static host reservations with online/offline indicators.
-
-### DNS View
-Browse DNS zones and records with search functionality.
-
-### IP Scanner
-Visual grid of online hosts with hostname mapping.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
-
-## Author
-
-**Daniel Nylander** - © 2026
-
-## Acknowledgments
-
-- [Flask](https://flask.palletsprojects.com/) - Web framework
-- [Chart.js](https://www.chartjs.org/) - Charts library
-- [ISC DHCP](https://www.isc.org/dhcp/) - DHCP server
-- [BIND](https://www.isc.org/bind/) - DNS server
+**Daniel Nylander** – [@yeager](https://github.com/yeager) – © 2026
