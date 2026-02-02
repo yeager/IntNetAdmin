@@ -24,7 +24,7 @@ from flask_babel import Babel, gettext as _
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'intnetadmin-default-secret-change-in-production')
 app.config['BABEL_DEFAULT_LOCALE'] = 'en'
-app.config['BABEL_SUPPORTED_LOCALES'] = ['en', 'sv']
+app.config['BABEL_SUPPORTED_LOCALES'] = ['en', 'sv', 'de', 'fr', 'es', 'it', 'nl', 'pt', 'no', 'da']
 
 babel = Babel(app)
 
@@ -71,7 +71,7 @@ def get_locale():
     """Get user's preferred locale"""
     if 'lang' in session:
         return session['lang']
-    return request.accept_languages.best_match(['en', 'sv'])
+    return request.accept_languages.best_match(['en', 'sv', 'de', 'fr', 'es', 'it', 'nl', 'pt', 'no', 'da'])
 
 babel.init_app(app, locale_selector=get_locale)
 
@@ -1170,7 +1170,7 @@ def api_service_action(service, action):
 def api_set_lang():
     """Set language preference"""
     lang = request.json.get('lang', 'en')
-    if lang in ['en', 'sv']:
+    if lang in ['en', 'sv', 'de', 'fr', 'es', 'it', 'nl', 'pt', 'no', 'da']:
         session['lang'] = lang
         return jsonify({'status': 'ok', 'lang': lang})
     return jsonify({'error': 'Invalid language'}), 400
