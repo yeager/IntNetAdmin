@@ -1283,6 +1283,26 @@
         </div>
     </div>
     
+    <!-- Session Timeout Warning Modal -->
+    <div class="modal-overlay" id="session-timeout-modal">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>⏰ <span data-i18n="session_timeout">Session Timeout</span></h2>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p style="font-size: 1.1rem; margin-bottom: 1rem;" data-i18n="session_timeout_warning">
+                    Your session will expire in <strong id="timeout-countdown">60</strong> seconds.
+                </p>
+                <p style="color: var(--muted);" data-i18n="session_timeout_desc">
+                    Click OK to stay logged in.
+                </p>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn btn-primary" onclick="keepSessionAlive()" data-i18n="ok">OK</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Activate Changes Modal -->
     <div class="modal-overlay" id="activate-modal">
         <div class="modal" style="max-width: 600px;">
@@ -1455,7 +1475,12 @@
                 dhcp_staged: 'DHCP reservation staged',
                 dns_staged: 'DNS record staged',
                 ptr_staged: 'PTR record staged',
-                edit_network: 'Edit Network'
+                edit_network: 'Edit Network',
+                session_timeout: 'Session Timeout',
+                session_timeout_warning: 'Your session will expire in <strong id="timeout-countdown">60</strong> seconds.',
+                session_timeout_desc: 'Click OK to stay logged in.',
+                session_extended: 'Session extended',
+                ok: 'OK'
             },
             sv: {
                 slogan: 'Hantera ditt interna nätverk enkelt',
@@ -1576,7 +1601,12 @@
                 dhcp_staged: 'DHCP-reservation förberedd',
                 dns_staged: 'DNS-post förberedd',
                 ptr_staged: 'PTR-post förberedd',
-                edit_network: 'Redigera nätverk'
+                edit_network: 'Redigera nätverk',
+                session_timeout: 'Session upphör',
+                session_timeout_warning: 'Din session upphör om <strong id="timeout-countdown">60</strong> sekunder.',
+                session_timeout_desc: 'Klicka OK för att fortsätta.',
+                session_extended: 'Session förlängd',
+                ok: 'OK'
             },
             de: {
                 slogan: 'Verwalten Sie Ihr internes Netzwerk mit Leichtigkeit',
@@ -3096,6 +3126,77 @@
         }
         
         // ========================================================================
+        // Session Timeout Management
+        // ========================================================================
+        const SESSION_TIMEOUT_MS = 5 * 60 * 1000;  // 5 minutes
+        const WARNING_BEFORE_MS = 60 * 1000;       // Show warning 1 minute before
+        let sessionTimer = null;
+        let warningTimer = null;
+        let countdownInterval = null;
+        let lastActivity = Date.now();
+        
+        function resetSessionTimer() {
+            lastActivity = Date.now();
+            
+            // Clear existing timers
+            if (sessionTimer) clearTimeout(sessionTimer);
+            if (warningTimer) clearTimeout(warningTimer);
+            if (countdownInterval) clearInterval(countdownInterval);
+            
+            // Hide warning if visible
+            hideModal('session-timeout-modal');
+            
+            // Set warning timer (4 minutes)
+            warningTimer = setTimeout(showSessionWarning, SESSION_TIMEOUT_MS - WARNING_BEFORE_MS);
+            
+            // Set logout timer (5 minutes)
+            sessionTimer = setTimeout(sessionExpired, SESSION_TIMEOUT_MS);
+        }
+        
+        function showSessionWarning() {
+            let countdown = 60;
+            document.getElementById('timeout-countdown').textContent = countdown;
+            showModal('session-timeout-modal');
+            
+            countdownInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('timeout-countdown').textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+        }
+        
+        function sessionExpired() {
+            hideModal('session-timeout-modal');
+            window.location.href = '/logout';
+        }
+        
+        async function keepSessionAlive() {
+            hideModal('session-timeout-modal');
+            if (countdownInterval) clearInterval(countdownInterval);
+            
+            try {
+                await fetch('/api/session/keepalive', { method: 'POST' });
+                resetSessionTimer();
+                showToast(t('session_extended') || 'Session extended');
+            } catch (e) {
+                console.error('Failed to extend session:', e);
+                window.location.href = '/logout';
+            }
+        }
+        
+        // Track user activity
+        ['click', 'keypress', 'scroll', 'mousemove'].forEach(event => {
+            document.addEventListener(event, () => {
+                // Only reset if more than 30 seconds since last activity
+                if (Date.now() - lastActivity > 30000) {
+                    resetSessionTimer();
+                }
+            }, { passive: true });
+        });
+        
+        // ========================================================================
         // Initialize
         // ========================================================================
         async function init() {
@@ -3104,6 +3205,9 @@
             
             applyTheme();
             applyTranslations();
+            
+            // Start session timeout timer
+            resetSessionTimer();
             
             await Promise.all([
                 loadUser(),

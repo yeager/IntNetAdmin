@@ -26,6 +26,9 @@ app.secret_key = os.environ.get('SECRET_KEY', 'intnetadmin-default-secret-change
 app.config['BABEL_DEFAULT_LOCALE'] = 'en'
 app.config['BABEL_SUPPORTED_LOCALES'] = ['en', 'sv', 'de', 'fr', 'es', 'it', 'nl', 'pt', 'no', 'da']
 
+# Session timeout: 5 minutes
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
+
 babel = Babel(app)
 
 # ============================================================================
@@ -1000,6 +1003,7 @@ def login():
         password = request.form.get('password', '')
         
         if pam_authenticate(username, password):
+            session.permanent = True
             session['user'] = username
             session['login_time'] = datetime.now().isoformat()
             return redirect(url_for('index'))
@@ -1025,6 +1029,13 @@ def api_user():
         'login_time': session.get('login_time'),
         'has_sudo': 'sudo_password' in session
     })
+
+@app.route('/api/session/keepalive', methods=['POST'])
+@login_required
+def api_keepalive():
+    """Refresh session to prevent timeout"""
+    session.modified = True
+    return jsonify({'status': 'ok', 'timeout_minutes': 5})
 
 @app.route('/api/sudo', methods=['POST'])
 @login_required
