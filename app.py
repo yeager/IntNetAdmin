@@ -1168,6 +1168,85 @@ def api_create_zone():
     else:
         return jsonify({'error': msg}), 500
 
+@app.route('/api/dns/zone/import', methods=['POST'])
+@login_required
+@sudo_required
+def api_import_zone():
+    """Import a DNS zone file"""
+    # Check if file upload or text content
+    if 'file' in request.files:
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        content = file.read().decode('utf-8')
+        # Try to get zone name from filename (db.example.com -> example.com)
+        filename = file.filename
+        if filename.startswith('db.'):
+            suggested_zone = filename[3:]
+        else:
+            suggested_zone = filename.rsplit('.', 1)[0] if '.' in filename else filename
+    else:
+        data = request.json or {}
+        content = data.get('content', '')
+        suggested_zone = data.get('zone_name', '')
+    
+    if not content:
+        return jsonify({'error': 'No zone content provided'}), 400
+    
+    # Try to extract zone name from SOA record
+    soa_match = re.search(r'@\s+(?:\d+\s+)?(?:IN\s+)?SOA\s+(\S+)\s+(\S+)', content)
+    if soa_match:
+        # Extract zone from SOA NS field if needed
+        pass
+    
+    # Try to find $ORIGIN directive
+    origin_match = re.search(r'\$ORIGIN\s+(\S+?)\.?\s*$', content, re.MULTILINE)
+    zone_name = origin_match.group(1).rstrip('.') if origin_match else suggested_zone
+    
+    if not zone_name:
+        return jsonify({'error': 'Could not determine zone name. Please specify zone_name.'}), 400
+    
+    zone_name = sanitize_hostname(zone_name)
+    if not zone_name:
+        return jsonify({'error': 'Invalid zone name'}), 400
+    
+    # Parse records for preview
+    records = parse_zone_records(content)
+    
+    # Write zone file
+    filepath = os.path.join(CONFIG['bind_dir'], f'db.{zone_name}')
+    
+    # Check if zone already exists
+    if os.path.exists(filepath):
+        return jsonify({
+            'error': f'Zone {zone_name} already exists',
+            'zone': zone_name,
+            'records_found': len(records)
+        }), 409
+    
+    try:
+        # Write via sudo
+        temp_file = f'/tmp/db.{zone_name}.{os.getpid()}'
+        with open(temp_file, 'w') as f:
+            f.write(content)
+        
+        success, stdout, stderr = run_with_sudo(['cp', temp_file, filepath])
+        os.remove(temp_file)
+        
+        if success:
+            # Reload BIND
+            run_with_sudo(['systemctl', 'reload', 'bind9'])
+            return jsonify({
+                'status': 'ok',
+                'zone': zone_name,
+                'records_imported': len(records),
+                'message': f'Zone {zone_name} imported with {len(records)} records'
+            })
+        else:
+            return jsonify({'error': stderr or 'Failed to write zone file'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/dns/zone/<zone>/record', methods=['POST'])
 @login_required
 def api_add_dns_record(zone):

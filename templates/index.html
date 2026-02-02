@@ -794,7 +794,10 @@
             <div class="card">
                 <div class="card-header">
                     <h2>📍 <span data-i18n="dns_zones">DNS Zones</span></h2>
-                    <button class="btn btn-primary" onclick="showModal('add-zone-modal')">➕ <span data-i18n="add_zone">Add Zone</span></button>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-primary" onclick="showModal('add-zone-modal')">➕ <span data-i18n="add_zone">Add Zone</span></button>
+                        <button class="btn btn-secondary" onclick="showModal('import-zone-modal')">📥 <span data-i18n="import_zone">Import Zone</span></button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="zone-tabs" id="zone-tabs"></div>
@@ -1075,6 +1078,53 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideModal('add-zone-modal')" data-i18n="cancel">Cancel</button>
                 <button class="btn btn-primary" onclick="addDnsZone()" data-i18n="add_zone">Add Zone</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Import Zone Modal -->
+    <div class="modal-overlay" id="import-zone-modal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>📥 <span data-i18n="import_zone">Import Zone File</span></h2>
+                <button class="modal-close" onclick="hideModal('import-zone-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.875rem;" data-i18n="import_zone_desc">
+                    Upload a BIND zone file or paste its contents below.
+                </p>
+                
+                <div class="form-group">
+                    <label data-i18n="zone_file">Zone File</label>
+                    <input type="file" class="form-input" id="import-zone-file" accept=".zone,.txt,db.*" style="padding: 0.5rem;">
+                </div>
+                
+                <div style="text-align: center; color: var(--muted); margin: 1rem 0;">— <span data-i18n="or">or</span> —</div>
+                
+                <div class="form-group">
+                    <label data-i18n="zone_content">Zone Content</label>
+                    <textarea class="form-input" id="import-zone-content" rows="10" placeholder="$ORIGIN example.com.
+$TTL 86400
+@   IN  SOA ns1.example.com. admin.example.com. (
+            2024010101 ; serial
+            3600       ; refresh
+            1800       ; retry
+            604800     ; expire
+            86400 )    ; minimum
+
+@       IN  NS      ns1.example.com.
+@       IN  A       192.168.1.1
+www     IN  A       192.168.1.2" style="font-family: monospace; font-size: 0.8rem;"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label data-i18n="zone_name_optional">Zone Name (optional, auto-detected from file)</label>
+                    <input type="text" class="form-input" id="import-zone-name" placeholder="example.com">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal('import-zone-modal')" data-i18n="cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="importZone()" data-i18n="import">Import</button>
             </div>
         </div>
     </div>
@@ -1480,7 +1530,17 @@
                 session_timeout_warning: 'Your session will expire in <strong id="timeout-countdown">60</strong> seconds.',
                 session_timeout_desc: 'Click OK to stay logged in.',
                 session_extended: 'Session extended',
-                ok: 'OK'
+                ok: 'OK',
+                import_zone: 'Import Zone',
+                import_zone_desc: 'Upload a BIND zone file or paste its contents below.',
+                zone_file: 'Zone File',
+                zone_content: 'Zone Content',
+                zone_name_optional: 'Zone Name (optional, auto-detected)',
+                import: 'Import',
+                or: 'or',
+                import_no_content: 'Please select a file or paste zone content',
+                zone_imported: 'Zone imported successfully',
+                zone_exists: 'Zone already exists'
             },
             sv: {
                 slogan: 'Hantera ditt interna nätverk enkelt',
@@ -1606,7 +1666,17 @@
                 session_timeout_warning: 'Din session upphör om <strong id="timeout-countdown">60</strong> sekunder.',
                 session_timeout_desc: 'Klicka OK för att fortsätta.',
                 session_extended: 'Session förlängd',
-                ok: 'OK'
+                ok: 'OK',
+                import_zone: 'Importera zon',
+                import_zone_desc: 'Ladda upp en BIND-zonfil eller klistra in innehållet nedan.',
+                zone_file: 'Zonfil',
+                zone_content: 'Zoninnehåll',
+                zone_name_optional: 'Zonnamn (valfritt, detekteras automatiskt)',
+                import: 'Importera',
+                or: 'eller',
+                import_no_content: 'Välj en fil eller klistra in zoninnehåll',
+                zone_imported: 'Zon importerad',
+                zone_exists: 'Zonen finns redan'
             },
             de: {
                 slogan: 'Verwalten Sie Ihr internes Netzwerk mit Leichtigkeit',
@@ -2673,6 +2743,64 @@
                 loadStats();
             } else {
                 showToast(data.error || 'Failed to create zone', 'error');
+            }
+        }
+        
+        async function importZone() {
+            if (!hasSudo) {
+                pendingSudoCallback = importZone;
+                showModal('sudo-modal');
+                return;
+            }
+            
+            const fileInput = document.getElementById('import-zone-file');
+            const content = document.getElementById('import-zone-content').value.trim();
+            const zoneName = document.getElementById('import-zone-name').value.trim();
+            
+            let formData;
+            
+            if (fileInput.files.length > 0) {
+                // File upload
+                formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                if (zoneName) formData.append('zone_name', zoneName);
+                
+                const res = await fetch('/api/dns/zone/import', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await res.json();
+                handleImportResponse(res, data);
+            } else if (content) {
+                // Text content
+                const res = await fetch('/api/dns/zone/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content, zone_name: zoneName })
+                });
+                
+                const data = await res.json();
+                handleImportResponse(res, data);
+            } else {
+                showToast(t('import_no_content') || 'Please select a file or paste zone content', 'error');
+            }
+        }
+        
+        function handleImportResponse(res, data) {
+            if (res.ok) {
+                showToast(t('zone_imported') || `Zone ${data.zone} imported with ${data.records_imported} records`);
+                hideModal('import-zone-modal');
+                // Clear form
+                document.getElementById('import-zone-file').value = '';
+                document.getElementById('import-zone-content').value = '';
+                document.getElementById('import-zone-name').value = '';
+                loadDNS();
+                loadStats();
+            } else if (res.status === 409) {
+                showToast(t('zone_exists') || `Zone ${data.zone} already exists`, 'error');
+            } else {
+                showToast(data.error || 'Failed to import zone', 'error');
             }
         }
         
