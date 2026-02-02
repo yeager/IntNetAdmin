@@ -959,9 +959,11 @@
                     <div class="setting-row">
                         <div>
                             <div class="setting-label" data-i18n="network_range">Network Range</div>
-                            <div class="setting-desc" data-i18n="network_range_desc">CIDR notation (e.g., 192.168.1.0/24)</div>
+                            <div class="setting-desc" data-i18n="network_range_desc">Select from predefined networks</div>
                         </div>
-                        <input type="text" class="setting-input" id="setting-network" value="192.168.2.0/23" style="width: 150px;">
+                        <select class="setting-input" id="setting-network" style="width: 180px;">
+                            <!-- Populated by JavaScript -->
+                        </select>
                     </div>
                     <div class="setting-row">
                         <div>
@@ -2142,9 +2144,21 @@
             
             document.getElementById('setting-scan-interval').value = config.scan_interval;
             document.getElementById('setting-ping-timeout').value = config.ping_timeout;
-            document.getElementById('setting-network').value = config.network;
             document.getElementById('setting-max-threads').value = config.max_threads;
             document.getElementById('scanner-network').textContent = config.network;
+            
+            // Populate network dropdown with allowed networks
+            const networkSelect = document.getElementById('setting-network');
+            networkSelect.innerHTML = '';
+            if (config.allowed_networks) {
+                config.allowed_networks.forEach(net => {
+                    const option = document.createElement('option');
+                    option.value = net;
+                    option.textContent = net;
+                    if (net === config.network) option.selected = true;
+                    networkSelect.appendChild(option);
+                });
+            }
         }
         
         async function loadHistory() {

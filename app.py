@@ -35,12 +35,22 @@ babel = Babel(app)
 DEFAULT_CONFIG = {
     'dhcp_conf': os.environ.get('DHCP_CONF', '/etc/dhcp/dhcpd.conf'),
     'bind_dir': os.environ.get('BIND_DIR', '/etc/bind'),
-    'network': os.environ.get('NETWORK_CIDR', '10.0.0.0/24'),
+    'network': os.environ.get('NETWORK_CIDR', '192.168.2.0/23'),
     'scan_interval': int(os.environ.get('SCAN_INTERVAL', 7200)),  # 2 hours in seconds
     'ping_timeout': int(os.environ.get('PING_TIMEOUT', 1)),
     'ping_count': int(os.environ.get('PING_COUNT', 1)),
     'max_threads': int(os.environ.get('MAX_THREADS', 100)),
 }
+
+# Predefined allowed networks for scanning (security: prevent scanning arbitrary networks)
+ALLOWED_NETWORKS = [
+    '192.168.2.0/23',
+    '192.168.2.0/24',
+    '192.168.3.0/24',
+    '10.0.0.0/24',
+    '10.0.1.0/24',
+    '172.16.0.0/24',
+]
 
 # Runtime config (can be changed via settings)
 CONFIG = dict(DEFAULT_CONFIG)
@@ -1103,7 +1113,8 @@ def api_config():
         'bind_dir': CONFIG['bind_dir'],
         'scan_interval': CONFIG['scan_interval'],
         'ping_timeout': CONFIG['ping_timeout'],
-        'max_threads': CONFIG['max_threads']
+        'max_threads': CONFIG['max_threads'],
+        'allowed_networks': ALLOWED_NETWORKS
     })
 
 @app.route('/api/config', methods=['POST'])
@@ -1116,11 +1127,16 @@ def api_update_config():
     if 'ping_timeout' in data:
         CONFIG['ping_timeout'] = max(1, min(10, int(data['ping_timeout'])))  # 1-10 seconds
     if 'network' in data:
-        try:
-            ipaddress.ip_network(data['network'], strict=False)
-            CONFIG['network'] = data['network']
-        except ValueError:
-            pass
+        network = data['network']
+        # Only allow predefined networks for security
+        if network in ALLOWED_NETWORKS:
+            try:
+                ipaddress.ip_network(network, strict=False)
+                CONFIG['network'] = network
+            except ValueError:
+                pass
+        else:
+            return jsonify({'error': 'Network not in allowed list', 'allowed': ALLOWED_NETWORKS}), 400
     if 'max_threads' in data:
         CONFIG['max_threads'] = max(10, min(500, int(data['max_threads'])))
     
